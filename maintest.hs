@@ -132,8 +132,8 @@ chercheLeTriplet listexy listeComplete = do
             then triplet
         else []
 
-joueSurUneCaseAdverse :: [[String]] -> String -> Int -> Int -> [[String]]
-joueSurUneCaseAdverse jeu piece x y = modifierCase2D jeu piece x y
+joue :: [[String]] -> String -> Int -> Int -> [[String]]
+joue jeu piece x y = modifierCase2D jeu piece x y
     
 
 estUnePieceTailleInf :: String -> String -> Bool
@@ -202,6 +202,43 @@ verifieJaiPasPerdu jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
         Nothing -> InfosJeu "cas1" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
     
     
+    
+goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int
+goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i = do 
+--gober une piece (mienne ou adverse)
+    ---verifie la taille
+    --taillePieceAdd est la piece en input
+    --taillePieceDsJeu est la piece ds list2dDictio 
+    --recupere la taille de la piece a cette pos 
+    --let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire
+    --let estPieceGobable = estUnePieceTailleInf taillePieceAdd taillePieceDsJeu
+    --print pieceGobable
+    --if estPieceGobable 
+    --    then do 
+            --ajoute ds liste2DAvecDictionnaire
+            --refais tab list coord
+            --let newListe2DDictio = addToDictionaryIn2DList x y taillePieceAdd piece liste2DAvecDictionnaire
+            --modif case jeu 
+            --let jeu2 = modifierCase2D jeu piece x y
+            --retourne newListe2DDictio et jeu2 
+            --en fait retourne tt les infos du jeu
+    --else que faire?
+    
+    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire 
+    case taillePieceDsJeu of
+        Just taillePieceDsJeu -> do
+            let estPieceGobable = estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu
+            if estPieceGobable
+                let newJeu = joue jeu piece x y
+                let (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces new [] [] 0 0
+                let newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DAvecDictionnaire
+                
+                --retourne tt les valeurs
+            else --???    
+
+        Nothing -> 
+
+
     
 main :: IO ()
 main = do
@@ -286,7 +323,7 @@ main = do
     let rep1 = peutJouerCase triplet 0 0 2
     print rep1
     
-    let newJeu = joueSurUneCaseAdverse jeu "X3" 0 0
+    let newJeu = joue jeu "X3" 0 0
     print newJeu
     
     
@@ -376,10 +413,12 @@ main = do
     --if estPieceGobable 
     --    then do 
             --ajoute ds liste2DAvecDictionnaire
+            --refais tab list coord
             --let newListe2DDictio = addToDictionaryIn2DList x y taillePieceAdd piece liste2DAvecDictionnaire
             --modif case jeu 
             --let jeu2 = modifierCase2D jeu piece x y
             --retourne newListe2DDictio et jeu2 
+            --en fait retourne tt les infos du jeu
     --else que faire?
     
     
