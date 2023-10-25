@@ -1,29 +1,44 @@
 import Joueur
 import System.IO
 import Liste 
+import Move
 
---ca me eprmet de renvoyer 2 listes (le jeu,la listeCoorespondante modifie du joueur)
-data ListeModifie = ListeModifie [[String]] [String]
 
 data InfosJeu = InfosJeu String [[String]] [Int] [Int] [[DictionnairePiece]] Int Int Int
---message jeu 
+-- message jeu 
+-- jeu 
+-- listeCoord1
+-- listeCoord2 
+-- dict2D 
+-- listeRestantes
 
-jeu = [ ["O3", "__", "__", "X3"]
-                  , ["O2", "X3", "__", "__"]
-                  , ["O1", "__", "__", "__"]
-                  , ["O0", "__", "__", "__"] ]
+
+jeu = [ ["__", "__", "__", "__"]
+                  , ["__", "__", "__", "__"]
+                  , ["__", "__", "__", "__"]
+                  , ["__", "__", "__", "__"] ]
 
 
-diffTaillePiece = ["B", "M", "S", "T"]
 
+estUnChar :: Char -> Bool
+estUnChar ca = ca == '0'
 
 -- recree la liste dependamment de quelle piece a changer grace a sa taille
-updateNewListePieceJoueurs :: String -> [String] -> [[String]]
-updateNewListePieceJoueurs taille listeModifie
-    | taille == "B" = [listeModifie,listeMUser,listeSUser,listeTUser]
-    | taille == "M" = [listeBUser,listeModifie,listeSUser,listeTUser]
-    | taille == "S" = [listeBUser,listeMUser,listeModifie,listeTUser]
-    | taille == "T" = [listeBUser,listeMUser,listeSUser,listeModifie]
+updateNewListePieceJoueurs :: String -> ListesDispo -> ([[String]],[[String]])
+updateNewListePieceJoueurs taille listeModif (ListesDispo liste1 liste2 liste3 liste11 liste22 liste33)
+    | (listeModifie !! 0) == 'O' 
+        | taille == "B" = ListesDispo listeModifie liste2 liste3 liste11 liste22 liste33
+        | taille == "M" = ListesDispo liste1 listeModifie liste3 liste11 liste22 liste33
+        | taille == "S" = ListesDispo liste1 liste2 listeModifie liste11 liste22 liste33
+        | taille == "T" = ListesDispo liste1 liste2 listeModifie liste11 liste22 liste33
+    
+    | listeModifie !! 0 == 'X'
+        | taille == "B" = [listeModifie,listeMUser,listeSUser,listeTUser]
+        | taille == "M" = [listeBUser,listeModifie,listeSUser,listeTUser]
+        | taille == "S" = [listeBUser,listeMUser,listeModifie,listeTUser]
+        | taille == "T" = [listeBUser,listeMUser,listeSUser,listeModifie]
+    
+    ListesDispo liste1 liste2 listeModifie liste11 liste22 liste33
 
 
 
@@ -47,16 +62,8 @@ messageBienvenue = do
 
 
 
---meilleur version , plus clean
-modifierCase2D :: [[a]] -> a -> Int -> Int -> [[a]]
-modifierCase2D tableau nouvelleValeur ligne colonne
-  | ligne < 0 || ligne >= length tableau || colonne < 0 || colonne >= length (tableau !! 0) = tableau
-  | otherwise =
-    let (avant, apres) = splitAt colonne (tableau !! ligne)
-    in take ligne tableau ++ [avant ++ [nouvelleValeur] ++ tail apres] ++ drop (ligne + 1) tableau
-
-
-drop1 :: String -> Int -> Int -> ListeModifie
+{--
+drop1 :: Player -> String -> Int -> Int -> ListeModifie
 drop1 taille x y
   | taille `elem` diffTaillePiece =
     let (pieces, diffPieceJoueur) = case taille of
@@ -71,7 +78,7 @@ drop1 taille x y
     in ListeModifie jeu1 newListePiece
   | otherwise = ListeModifie [[]] ["pas bon"]
 
-
+--}
 onboard :: [[String]] -> Int -> Int -> Int -> Int -> [[String]]
 onboard jeuDepart y1 x1 y2 x2
   | x1 < 0 || x1 >= length jeuDepart || y1 < 0 || y1 >= length (jeuDepart !! 0) || x2 < 0 || x2 >= length jeuDepart || y2 < 0 || y2 >= length (jeuDepart !! 0) = jeuDepart
@@ -154,7 +161,7 @@ estTaPiece (x:xs) (y:ys) = x == y
 placeTemporairementPieceEnDessousDsJeu :: [[String]] -> String -> Int -> Int -> [[String]] 
 placeTemporairementPieceEnDessousDsJeu jeu pieceEnDessous x y = modifierCase2D jeu pieceEnDessous x y 
 
-
+{-- 
 verifieJaiPasPerdu :: [[String]] -> [Int] -> [Int] -> [[DictionnairePiece]] -> Int -> Int -> Int -> InfosJeu 
 verifieJaiPasPerdu jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i = do
     
@@ -200,10 +207,61 @@ verifieJaiPasPerdu jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
                 
               Nothing -> InfosJeu "cas2" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
         Nothing -> InfosJeu "cas1" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+--}
+
+
+
+verifieJaiPasPerdu :: InfosJeu -> InfosJeu 
+verifieJaiPasPerdu (InfosJeu message jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i) = do
     
     
+    --let caseValue = recupereValeurTeteDictio x y liste2DAvecDictionnaire
     
-goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int
+    let cle = recupererCleTeteDictio x y liste2DAvecDictionnaire
+    
+    case cle of
+        Just cle -> do
+            let pieceEtListDictio = removeKeyValueAtPosition x y cle liste2DAvecDictionnaire
+    
+            case pieceEtListDictio of
+              Just ((cleEnlevee, valeurEnlevee), updatedList) -> do
+                --print cleEnlevee
+                --print valeurEnlevee
+                
+                let caseValueDessous = recupereValeurTeteDictio x y updatedList
+                
+                case caseValueDessous of
+                    Just caseValueDessous -> do
+                        let resultat = estTaPiece valeurEnlevee caseValueDessous
+                        
+                        
+                        if resultat
+                                then InfosJeu "ma piece tranquillo" jeu listeCoordJr1 listeCoordJr2 updatedList x y i
+                            --si cest pas ta piece
+                            --verifie si ce jr gagne
+                        else do 
+                            let newJeu = placeTemporairementPieceEnDessousDsJeu jeu caseValueDessous x y
+                            --creer liste coord 
+                            let (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
+                            let listeAdversaire = renvoieListeJrAdverse i posPieceOrdi posPieceJr
+                            
+                            let adversaireAGagne = estLeJoueurGagnant listeAdversaire 0
+                            
+                            if adversaireAGagne
+                                then InfosJeu "vous avez perdu" newJeu listeCoordJr1 listeCoordJr2 updatedList x y i
+                            
+                            else InfosJeu "" newJeu listeCoordJr1 listeCoordJr2 updatedList x y i
+
+                    Nothing -> InfosJeu "cas3" jeu listeCoordJr1 listeCoordJr2 updatedList x y i
+                
+              Nothing -> InfosJeu "cas2" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+        Nothing -> InfosJeu "cas1" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+    
+
+
+
+
+goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> InfosJeu
 goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i = do 
 --gober une piece (mienne ou adverse)
     ---verifie la taille
@@ -223,22 +281,90 @@ goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr
             --retourne newListe2DDictio et jeu2 
             --en fait retourne tt les infos du jeu
     --else que faire?
+        --ressais infos et essaie de regober
     
-    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire 
+    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire
     case taillePieceDsJeu of
-        Just taillePieceDsJeu -> do
-            let estPieceGobable = estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu
-            if estPieceGobable
+        Just taillePieceDsJeu
+            | estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu -> do
+                -- Si gobable, effectue les opérations et retourne les informations du jeu
                 let newJeu = joue jeu piece x y
-                let (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces new [] [] 0 0
-                let newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DAvecDictionnaire
-                
-                --retourne tt les valeurs
-            else --???    
+                    (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
+                    newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DAvecDictionnaire
+                InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x y i
+            | otherwise -> InfosJeu "non gobable" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+                -- Si non gobable, récupère de nouvelles données et rappelle la fonction
+        Nothing -> InfosJeu "" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
 
-        Nothing -> 
+
+{- 
+userInfo <- resaisirCoup
+                let parsedMoves = parseMoves userInfo
+                case recupererDropOuOnboardInfo parsedMoves of
+                    Just (size, x1, y1, x2, y2) -> do
+                        let taille = transformeSizeEnString size
+                        goberUnePiece taille piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
+-}
+
+{--
+goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> InfosJeu
+goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i = do
+    -- Récupère la taille de la pièce à cette position
+    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire
+    case taillePieceDsJeu of
+        Just taillePieceDsJeu ->
+            | estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu =
+                -- Si gobable, effectue les opérations et retourne les informations du jeu
+                let newJeu = joue jeu piece x y
+                    (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
+                    newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DAvecDictionnaire
+                in InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x y i
+            | otherwise =
+                -- Si non gobable, récupère de nouvelles données et rappelle la fonction
+                userInfo <- resaisirCoup
+                let parsedMoves = parseMoves userInfo
+                case recupererDropOuOnboardInfo parsedMoves of
+                    Just (size, x1, y1, x2, y2) -> do 
+                        let taille = transformeSizeEnString size
+                        in goberUnePiece taille piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
+                    Nothing -> InfosJeu "" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+        Nothing -> InfosJeu "" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
+            -- Si la taille n'a pas été trouvée, retourne les informations du jeu avec une chaîne vide
+   --}         
 
 
+
+estUnJeuVide :: [[String]] -> Bool
+estUnJeuVide jeu = all (\row -> all (== "__") row) jeu
+
+
+
+
+-- Fonction pour demander à l'utilisateur de saisir une chaîne de caractères
+promptString :: String -> IO String
+promptString message = do
+    putStr message
+    hFlush stdout
+    getLine
+
+-- Fonction pour saisir les informations de l'utilisateur et les stocker dans un tableau
+getUserInfo :: IO [String]
+getUserInfo = do
+    coup <- promptString "Entrez votre coup : "
+
+    return [coup]
+
+
+resaisirCoup :: IO [String]
+resaisirCoup = do
+    putStrLn "Saisissez un nouveau coup :"
+    getUserInfo
+
+
+
+
+
+{--
     
 main :: IO ()
 main = do
@@ -384,6 +510,14 @@ main = do
     let (InfosJeu message jeu listeCoordJr1 listeCoordJr2 updatedList x y i) = verifieJaiPasPerdu jeu [1,1,2,2,3,3,4,4] [4,4] liste2DAvecDictionnaire 2 2 1
     print message
     
+    let (InfosJeu message jeu listeCoordJr1 listeCoordJr2 updatedList x y i) = goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
+    
+    
+        
+    
+    
+    
+    
     
     --addToDictionaryIn2DList 1 2 "B" "X3" liste2DAvecDictionnaire
     
@@ -429,9 +563,57 @@ main = do
         --sinon deplace la piece sur retirer ou tu veux 
     --fonction verifieJaiPasPerdu listeComplete liste2DAvecDictionnaire x y 
     
+--}
+
+main :: IO ()
+main = do
+    {--userInfo <- getUserInfo
+    putStrLn "Informations de l'utilisateur :"
+    putStrLn $ "Coup : " ++ head userInfo  -- Utilisez "head" pour accéder au premier élément de la liste
+
+    let parsedMoves = parseMoves userInfo
+    putStrLn "Mouvements analysés :"
+    mapM_ print parsedMoves--}
+
+    -- Récupération de la taille, x et y du premier drop s'il existe
     
+    putStrLn "Informations de l'utilisateur :"
+    userInfo <- resaisirCoup
+
+    let parsedMoves = parseMoves userInfo
+    --putStrLn "Mouvements analysés :"
+    --mapM_ print parsedMoves
     
+    let (taille, x1, y1, x2, y2) = case recupererDropOuOnboardInfo parsedMoves of
+            Just (size, x1, y1, x2, y2) -> (size, x1, y1, x2, y2)
+            Nothing -> (B, -1, -1, -1, -1)  -- Valeurs par défaut si pas de drop/onboard
     
+    let tt = transformeSizeEnString taille
+    print tt
+    
+    let val = estUnJeuVide jeu
+    
+    if val 
+        then do 
+            let (ListeModifie jeuUpdate liste pieceAJouer) = drop1 Ordi1 jeu tt x1 y1
+            print jeuUpdate 
+            let listeM = updateNewListePieceJoueurs tt liste (ListesDispo liste1 liste2 liste3 liste11 liste22 liste33)
+            print listeM
+            print (listeM !! 0 !! 0 !! 0)
+            
+            
+            
+            let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2DAvecDictionnaire
+            printList2DDictio newListe2DDictio
+            
+            
+            
+            
+            
+
+        else 
+            putStrLn "as vide"
+            
     
     
     
