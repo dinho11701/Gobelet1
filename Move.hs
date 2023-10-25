@@ -59,6 +59,12 @@ parseMoves input =
         Left _ -> []
 
 
+transformeSizeEnString :: Size -> String
+transformeSizeEnString T = "T"
+transformeSizeEnString B = "B"
+transformeSizeEnString S = "S"
+transformeSizeEnString M = "M"
+
 
 -- Fonction pour extraire le x, y et la taille du premier drop
 recupererDropOuOnboardInfo :: [Move] -> Maybe (Size, Int, Int, Int, Int)
