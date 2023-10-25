@@ -1,25 +1,3 @@
-{--import Move
-
-
-main :: IO ()
-main = do
-  let moves = ["drop(B, (0, 1))", "onboard((0, 2), (2, 1))"]
-      parsedMoves = parseMoves moves
-  putStrLn "Mouvements analysés :"
-  mapM_ print parsedMoves
-
-  -- Récupération de la taille, x et y du premier drop s'il existe
-  let firstDropInfo = case findDropInfo parsedMoves of
-        Just (size, x, y) -> (size, x, y)
-        Nothing -> (B, -1, -1)  -- Valeurs par défaut si pas de drop
-
-  putStrLn "Info du premier drop :"
-  print firstDropInfo
-  
-  let (taille, x, y) = firstDropInfo
-  print taille
-
---}
 import System.IO
 import Move 
 
@@ -36,7 +14,8 @@ getUserInfo = do
     coup <- promptString "Entrez votre coup : "
 
     return [coup]
-
+    
+    
 main :: IO ()
 main = do
     userInfo <- getUserInfo
@@ -48,15 +27,17 @@ main = do
     mapM_ print parsedMoves
 
     -- Récupération de la taille, x et y du premier drop s'il existe
-    let firstDropInfo = case findDropInfo parsedMoves of
-            Just (size, x, y) -> (size, x, y)
-            Nothing -> (B, -1, -1)  -- Valeurs par défaut si pas de drop
+    let (taille, x1, y1, x2, y2) = case findDropInfo parsedMoves of
+            Just (size, x, y, x2, y2) -> (size, x, y, x2, y2)
+            Nothing -> (B, -1, -1, -1, -1)  -- Valeurs par défaut si pas de drop/onboard
 
-    putStrLn "Info du premier drop :"
-    print firstDropInfo
-  
-    let (taille, x, y) = firstDropInfo
-    print taille
+    putStrLn "Info du premier drop/onboard :"
+    putStrLn $ "Taille : " ++ show taille
+    putStrLn $ "x1 : " ++ show x1
+    putStrLn $ "y1 : " ++ show y1
+    putStrLn $ "x2 : " ++ show x2
+    putStrLn $ "y2 : " ++ show y2
 
 
-
+    
+    
