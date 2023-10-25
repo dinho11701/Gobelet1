@@ -59,10 +59,11 @@ parseMoves input =
         Left _ -> []
 
 
+
 -- Fonction pour extraire le x, y et la taille du premier drop
-findDropInfo :: [Move] -> Maybe (Size, Int, Int)
-findDropInfo [] = Nothing
-findDropInfo (Drop size (Position x y) : _) = Just (size, x, y)
-findDropInfo (_ : rest) = findDropInfo rest
+recupererDropOuOnboardInfo :: [Move] -> Maybe (Size, Int, Int, Int, Int)
+recupererDropOuOnboardInfo [] = Nothing
+recupererDropOuOnboardInfo (Drop size (Position x y) : _) = Just (size, x, y,-1,-1)
+recupererDropOuOnboardInfo (Onboard (Position x1 y1) (Position x2 y2) : _) = Just (B,x1,y1,x2, y2)
 
 
