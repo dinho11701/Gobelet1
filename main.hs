@@ -27,7 +27,7 @@ main = do
     mapM_ print parsedMoves
 
     -- Récupération de la taille, x et y du premier drop s'il existe
-    let (taille, x1, y1, x2, y2) = case findDropInfo parsedMoves of
+    let (taille, x1, y1, x2, y2) = case recupererDropOuOnboardInfo parsedMoves of
             Just (size, x, y, x2, y2) -> (size, x, y, x2, y2)
             Nothing -> (B, -1, -1, -1, -1)  -- Valeurs par défaut si pas de drop/onboard
 
