@@ -637,7 +637,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                 putStrLn "ook ca devient interressant"
                 
                 
-                if estCasDrop
+                if estCasDrop [x2,y2]
                     then do
                         let pieceACettePosition = retourePieceAUnePosition jeu y1 x1
                         --cas drop case vide
