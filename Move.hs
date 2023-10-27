@@ -73,3 +73,22 @@ recupererDropOuOnboardInfo (Drop size (Position x y) : _) = Just (size, x, y,-1,
 recupererDropOuOnboardInfo (Onboard (Position x1 y1) (Position x2 y2) : _) = Just (B,x1,y1,x2, y2)
 
 
+estUnCoupValide :: Int -> Int -> Bool
+estUnCoupValide x y = x >= 0 && x <= 3 && y >= 0 && y <= 3 
+
+
+verifierCoup :: [Int] -> Bool
+verifierCoup liste
+    | all(\x -> x == -1) liste = False
+    | all(\x -> x == -1) [(liste !! 2),(liste !! 3)] = True
+    | otherwise = True
+    
+
+estCasDrop :: [Int] -> Bool
+estCasDrop liste = all(\x -> x == -1) liste 
+
+
+
+
+
+
