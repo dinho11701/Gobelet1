@@ -364,4 +364,3 @@ recupererCleTeteDictio row col myList
       _          -> Nothing
       
 
-
