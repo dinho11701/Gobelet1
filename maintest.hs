@@ -612,57 +612,104 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                     if estCasDrop [x2,y2]
                         then do 
                             --printList2DDictio liste2D
+                            
                             let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                 --(ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                             let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
-                            let (ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                            let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                 --let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2DAvecDictionnaire
                             putStrLn "biiien tu as affichee"
                             print pieceAJouer
                             printList2DDictio newListe2DDictio
+                            --putStrLn "ici taffiches hein"
+                            
                             --print jeuUpdate
                             --print listeMU
                             --regler plus tard le cas ou une des listes est vide
                             
-                            lancerPartie joueur tour (ListeModifie jeuUpdate newListe pieceAJouer) (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) newListe2DDictio
+                            lancerPartie joueur tour (ListeModifie jeuUpdate newListe pieceAJouer) (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) newListe2DDictio
                     
                     --cas onboard     
                     else do 
                         putStrLn "tu peux pas déplacer de pieces, cest un tab vide"
-                        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2DAvecDictionnaire
+                        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
             else do 
                 putStrLn "ook ca devient interressant"
                 
-                let pieceACettePosition = retourePieceAUnePosition jeu y1 x1
                 
-                if estUneCaseVide pieceACettePosition
+                if estCasDrop
                     then do
-                        let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste pieceACettePosition) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
-                        let (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                        print jeuUpdate
-                        --print listeMU
-                        --regler plus tard le cas ou une des listes est vide
-                        
-                        lancerPartie joueur tour (ListeModifie jeuUpdate newListe pieceAJouer) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) newListe2DDictio
+                        let pieceACettePosition = retourePieceAUnePosition jeu y1 x1
+                        --cas drop case vide
+                        if estUneCaseVide pieceACettePosition
+                            then do
+                                let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste pieceACettePosition) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
+                                let (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                print jeuUpdate
+                                --print listeMU
+                                --regler plus tard le cas ou une des listes est vide
+                                
+                                lancerPartie joueur tour (ListeModifie jeuUpdate newListe pieceAJouer) (ListesDispo message liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) newListe2DDictio
+                        else do
+                            putStrLn "to bad case non vide, faut gober"
+                            let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                            let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 0
+                            
+                            print messageN
+                            print updatedList
+                            print jeuUpdate
+                            
+                            if messageN == "non gobable"
+                                then do
+                                    putStrLn "piece non gobable, joue un autre coup"
+                                    lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                            else putStrLn "gob"
+                
                 
                 else do
-                    putStrLn "to bad case non vide"
+                    putStrLn "cas onboard"
                     
+                    let piecePositionDepart = retourePieceAUnePosition jeu y1 x1
+                        --cas onboard case de depart
+                    if estUneCaseVide piecePositionDepart
+                        then do 
+                            putStrLn "cas onboard: recommence, tu peux pas déplacer car ya pas de piece à cette case"
+                            lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                    else do 
+                        -- no vide
+                        --recupere taille de piece a cette position
+                        
+                        let taillePiece = recupereTailleCorrespondante piecePositionDepart
+                        
+                        let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece taillePiece piecePositionDepart jeu liste2D [] [] x2 y2 0
+                        
+                        print jeuUpdate
+                        print updatedList
+                        
+                        
+                    --cas drop non vide
                     --retourne piece de la taille que je veux
-                    --let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                    --print pieceACetteTaille
+                    {--let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                    let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 0
                     
-                    let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                    print pieceACetteTaille
-                    putStrLn "FIN"
-                    --let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2DAvecDictionnaire [] [] x1 y1 0
-                    --print pieceACetteTaille
-                    --goberUnePiece tt pieceACetteTaille jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
-                    --print piece
+                    print messageN
+                    print updatedList
+                    print jeuUpdate
                     
-                    --print jeuUpdate
-                    --print messageN
+                    if messageN == "non gobable"
+                        then do
+                            putStrLn "piece non gobable, joue un autre coup"
+                            lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                    else putStrLn "gob"
+                    --}
+                    
+                    
+                    --cas onboard case vide 
+                    
+                    
+                    
+                    
                     
                     --lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) updatedList
                 
@@ -671,7 +718,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
 
     else do 
         putStrLn "cest chaud faut recommencer"
-        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2DAvecDictionnaire
+        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
     
     
 
@@ -737,12 +784,13 @@ main = do
             
             let go = liste2DAvecDictionnaire
         
+
             
             
             lancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
             
             
-            
+        
             
 
         else do
