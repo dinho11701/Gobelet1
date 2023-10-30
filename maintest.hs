@@ -85,7 +85,7 @@ onboard jeuDepart y1 x1 y2 x2
   | otherwise =
     let pieceADeplacer = jeuDepart !! x1 !! y1
         jeuTemporaire = modifierCase2D jeuDepart pieceADeplacer x2 y2
-        jeuFinal = modifierCase2D jeuTemporaire "-" x1 y1
+        jeuFinal = modifierCase2D jeuTemporaire "__" x1 y1
     in jeuFinal
     
 
@@ -261,8 +261,8 @@ verifieJaiPasPerdu (InfosJeu message jeu listeCoordJr1 listeCoordJr2 liste2DAvec
 
 
 
-goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> InfosJeu
-goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoordJr2 x y i = do 
+goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> Int -> Int -> InfosJeu
+goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoordJr2 x1 y1 x2 y2 i = do 
 --gober une piece (mienne ou adverse)
     ---verifie la taille
     --taillePieceAdd est la piece en input
@@ -283,18 +283,18 @@ goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoord
     --else que faire?
         --ressais infos et essaie de regober
     
-    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DDict
+    let taillePieceDsJeu = recupererCleTeteDictio x2 y2 liste2DDict
     case taillePieceDsJeu of
         Just taillePieceDsJeu
             | estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu -> do
                 -- Si gobable, effectue les opérations et retourne les informations du jeu
-                let newJeu = joue jeu piece x y
+                let newJeu = onboard jeu y1 x1 y2 x2
                     (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
-                    newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DDict
-                InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x y i
-            | otherwise -> InfosJeu "non gobable" jeu listeCoordJr1 listeCoordJr2 liste2DDict x y i
+                    newListe2DDictio = addToDictionaryIn2DList x2 y2 taillePieceWantPlay piece liste2DDict
+                InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x2 y2 i
+            | otherwise -> InfosJeu "non gobable" jeu listeCoordJr1 listeCoordJr2 liste2DDict x2 y2 i
                 -- Si non gobable, récupère de nouvelles données et rappelle la fonction
-        Nothing -> InfosJeu "piece abscente" jeu listeCoordJr1 listeCoordJr2 liste2DDict x y i
+        Nothing -> InfosJeu "piece abscente" jeu listeCoordJr1 listeCoordJr2 liste2DDict x2 y2 i
 
 
 {- 
@@ -654,7 +654,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                         else do
                             putStrLn "to bad case non vide, faut gober"
                             let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                            let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 0
+                            let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
                             
                             print messageN
                             print updatedList
@@ -668,9 +668,11 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                 
                 
                 else do
-                    putStrLn "cas onboard"
+                    --onboard((0, 2), (2, 1))
+                    putStrLn "cas onboard tab pas vide hehe"
                     
                     let piecePositionDepart = retourePieceAUnePosition jeu y1 x1
+                    print piecePositionDepart
                         --cas onboard case de depart
                     if estUneCaseVide piecePositionDepart
                         then do 
@@ -681,11 +683,52 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                         --recupere taille de piece a cette position
                         
                         let taillePiece = recupereTailleCorrespondante piecePositionDepart
+                        print taillePiece
                         
-                        let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece taillePiece piecePositionDepart jeu liste2D [] [] x2 y2 0
+                        let caseFinale = retourePieceAUnePosition jeu y2 x2
                         
-                        print jeuUpdate
-                        print updatedList
+                        if estUneCaseVide caseFinale
+                            then do 
+                                print "ouiiiii case finale vide"
+                                let newJeu = onboard jeu y1 x1 y2 x2
+                                let newListe2DDictio = addToDictionaryIn2DList x2 y2 tt piecePositionDepart liste2D
+                                --retirerPiece de lancienne case (1,1)
+                                --let liste2DUpdate = removeKeyValueAtPosition x1 y1 taillePiece newListe2DDictio
+                                
+                                let pieceEtListDictio = removeKeyValueAtPosition x1 y1 taillePiece newListe2DDictio
+    
+                                case pieceEtListDictio of
+                                  Just ((cleEnlevee, valeurEnlevee), liste2DUpdate) -> do
+                                    print newJeu
+                                    printList2DDictio liste2DUpdate
+                                  Nothing -> putStrLn "chaud"
+                                
+                                --let (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                
+                        else do 
+                            print "piece a case finale a gober quand on deplace"
+                            let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece taillePiece piecePositionDepart jeu liste2D [] [] x1 y1 x2 y2 0
+                            --retirer en utilisant onboard ds la fonction gober pour le jeu 
+                            --retirer en utilisant removeKey ici 
+                            let pieceEtListDictio = removeKeyValueAtPosition x1 y1 taillePiece updatedList
+    
+                            case pieceEtListDictio of
+                              Just ((cleEnlevee, valeurEnlevee), liste2DUpdate) -> do
+                                print jeuUpdate
+                                printList2DDictio liste2DUpdate
+                                lancerPartie joueur tour (ListeModifie jeuUpdate liste piece) (ListesDispo messageN listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2DUpdate
+                              Nothing -> putStrLn "chaud"
+                            
+                            --lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2DUpdate
+                        
+                        --let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece taillePiece piecePositionDepart jeu liste2D [] [] x1 y1 x2 y2 0
+                        --goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoordJr2 x y i
+                        --print messageN
+                        --print jeuUpdate
+                        --printList2DDictio updatedList
+                        
+                        --let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
+                        --let (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                         
                         
                     --cas drop non vide
