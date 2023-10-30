@@ -98,6 +98,15 @@ drop1 joueur jeu taille x y (ListeModifie jeu1 newListePiece pieceAJouer) (Liste
 --retournePieceCorrespondante joueur (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) =
 
 
+recupereTailleCorrespondante :: String -> String
+recupereTailleCorrespondante piece
+    | piece == "X3" || piece == "O3" = "B"
+    | piece == "X2" || piece == "O2" = "M"
+    | piece == "X1" || piece == "O1" = "S"
+    | piece == "X0" || piece == "O0" = "T"
+    | otherwise = "Taille inconnue"
+
+
 
 retournePieceCorrespondante :: Player -> String -> ListesDispo -> String
 retournePieceCorrespondante Humain "B" (ListesDispo "" listeBU _ _ _ _ _ _ _) = 
