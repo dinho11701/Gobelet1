@@ -15,7 +15,7 @@ data InfosJeu = InfosJeu String [[String]] [Int] [Int] [[DictionnairePiece]] Int
 
 jeu = [ ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"]
-                  , ["__", "__", "__", "__"]
+                  , ["X3", "__", "__", "__"]
                   , ["__", "__", "__", "__"] ]
 
 
@@ -623,7 +623,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                             printList2DDictio newListe2DDictio
                             --putStrLn "ici taffiches hein"
                             
-                            --print jeuUpdate
+                            print jeuUpdate
                             --print listeMU
                             --regler plus tard le cas ou une des listes est vide
                             
@@ -751,7 +751,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                         if estUneCaseVide caseFinale
                             then do 
                                 print "ouiiiii case finale vide"
-                                let newJeu = onboard jeu y1 x1 y2 x2
+                                let newJeu = onboard jeu x1 y1 x2 y2
                                 let newListe2DDictio = addToDictionaryIn2DList x2 y2 tt piecePositionDepart liste2D
                                 --retirerPiece de lancienne case (1,1)
                                 --let liste2DUpdate = removeKeyValueAtPosition x1 y1 taillePiece newListe2DDictio
@@ -888,7 +888,11 @@ main = do
             
             let go = liste2DAvecDictionnaire
         
-
+            print go 
+            
+            --onboard((0, 2), (2, 1)) placer tel quel
+            --let j1 = onboard jeu 0 2 2 1 
+            --print j1
             
             
             lancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
@@ -901,6 +905,9 @@ main = do
             putStrLn "as vide"
             let go = liste2DAvecDictionnaire
             printList2DDictio go
+            
+            --let j1 = onboard jeu 0 2 2 1 
+            --print j1
             lancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
     
     
