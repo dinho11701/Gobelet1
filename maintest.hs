@@ -15,7 +15,7 @@ data InfosJeu = InfosJeu String [[String]] [Int] [Int] [[DictionnairePiece]] Int
 
 jeu = [ ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"]
-                  , ["X3", "__", "__", "__"]
+                  , ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"] ]
 
 
@@ -288,7 +288,7 @@ goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoord
         Just taillePieceDsJeu
             | estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu -> do
                 -- Si gobable, effectue les opérations et retourne les informations du jeu
-                let newJeu = onboard jeu y1 x1 y2 x2
+                let newJeu = onboard jeu x1 y1 x2 y2
                     (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
                     newListe2DDictio = addToDictionaryIn2DList x2 y2 taillePieceWantPlay piece liste2DDict
                 InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x2 y2 i
@@ -613,7 +613,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                         then do 
                             --printList2DDictio liste2D
                             
-                            let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                            let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                 --(ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                             let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
                             let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
@@ -659,7 +659,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                         lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
 
                                 else do
-                                    let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste pieceACettePosition) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                    let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste pieceACettePosition) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                     putStrLn "cest cette liste qui correspond a la taille"
                                     print newListe
                                     print jeuUpdate
@@ -702,7 +702,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                 let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
                                 
                                 
-                                let (ListeModifie jeuNew newListe pieceAJouer) = drop1 joueur jeu tt x1 y1 (ListeModifie jeu liste pieceACetteTaille) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                let (ListeModifie jeuNew newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste pieceACetteTaille) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                 let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D
                                 
                                 let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
