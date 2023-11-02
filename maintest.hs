@@ -2,6 +2,7 @@ import Joueur
 import System.IO
 import Liste 
 import Move
+import Debug.Trace
 
 
 data InfosJeu = InfosJeu String [[String]] [Int] [Int] [[DictionnairePiece]] Int Int Int
@@ -647,11 +648,33 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                 print listeBU
                                 print listeMU
                                 
+                                print listeSU 
+                                print listeTU 
+                                print listeBO 
+                                print listeMO 
+                                print listeSO 
+                                print listeTO
+                                
                                 
                                 --let tailleListeCategorie = length liste
                                 
-                                let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-
+                                let pieceACetteTaille = trace ("aaaaaa" ++ tt ++ message) $ retournePieceCorrespondante joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                
+                                putStrLn"------------"
+                                
+                                print pieceACetteTaille
+                                
+                                
+                                print tt 
+                                print listeBU
+                                print listeMU
+                                
+                                print listeSU 
+                                print listeTU 
+                                print listeBO 
+                                print listeMO 
+                                print listeSO 
+                                print listeTO
                                 
                                 if pieceACetteTaille == ""
                                     then do 
