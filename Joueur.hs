@@ -1,4 +1,5 @@
 module Joueur where
+import Debug.Trace
 
 --ca me eprmet de renvoyer 2 listes (le jeu,la listeCoorespondante modifie du joueur)
 data ListeModifie = ListeModifie [[String]] [String] String
@@ -107,9 +108,38 @@ recupereTailleCorrespondante piece
     | otherwise = "Taille inconnue"
 
 
+piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
+piecePrisDansBonOrdre Humain "T" (ListesDispo _ listeBU listeMU listeSU listeTU _ _ _ _)
+    | null listeBU && null listeMU && null listeSU = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Humain "S" (ListesDispo _ listeBU listeMU listeSU listeTU _ _ _ _)
+    | null listeBU && null listeMU = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Humain "M" (ListesDispo _ listeBU _ _ _ _ _ _ _)
+    | null listeBU = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Humain "B" (ListesDispo _ listeBU _ _ _ _ _ _ _)
+    | not (null listeBU) = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Ordi1 "T" (ListesDispo _ _ _ _ _ listeBO listeMO listeSO listeTO)
+    | null listeBO && null listeMO && null listeSO = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Ordi1 "S" (ListesDispo _ _ _ _ _ listeBO listeMO _ _)
+    | null listeBO && null listeMO = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Ordi1 "M" (ListesDispo _ _ _ _ _ listeBO _ _ _)
+    | null listeBO = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre Ordi1 "B" (ListesDispo _ _ _ _ _ listeBO _ _ _)
+    | not (null listeBO) = "oui"
+    | otherwise = "non"
+piecePrisDansBonOrdre _ _ _ = "non"
+
+
+
 
 retournePieceCorrespondante :: Player -> String -> ListesDispo -> String
-retournePieceCorrespondante Humain "B" (ListesDispo "" listeBU _ _ _ _ _ _ _) = 
+retournePieceCorrespondante Humain "B" (ListesDispo "" listeBU _ _ _ _ _ _ _) = trace "aaa" $
     if not (null listeBU) then head listeBU else ""
 retournePieceCorrespondante Humain "M" (ListesDispo "" _ listeMU _ _ _ _ _ _) = 
     if not (null listeMU) then head listeMU else ""
