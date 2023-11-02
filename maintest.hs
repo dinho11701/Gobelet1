@@ -648,9 +648,12 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                 print listeMU
                                 
                                 
-                                let tailleListeCategorie = length liste
+                                --let tailleListeCategorie = length liste
                                 
-                                if tailleListeCategorie == 0
+                                let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+
+                                
+                                if pieceACetteTaille == ""
                                     then do 
                                         putStrLn "categorie chosit vide, rejoue avec une autre"
                                         lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
@@ -678,9 +681,13 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                         else do
                         
                             putStrLn "to bad case non vide, faut gober"
-                            let tailleListeCategorie = length liste
+                            
+                            let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+
+                            
+                            --let pieceACetteTaille = length liste
                             --print liste
-                            if tailleListeCategorie == 0
+                            if pieceACetteTaille == ""
                                 then do 
                                     putStrLn "categorie chosit vide, rejoue avec une autre"
                                     lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
@@ -688,7 +695,10 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                             else do
                             
                                 putStrLn "categorie good"
-                                let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                --let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                
+                                
+                                
                                 let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
                                 
                                 
