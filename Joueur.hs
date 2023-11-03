@@ -2,13 +2,30 @@ module Joueur where
 import Debug.Trace
 
 --ca me eprmet de renvoyer 2 listes (le jeu,la listeCoorespondante modifie du joueur)
-data ListeModifie = ListeModifie [[String]] [String] String
+data ListeModifie = ListeModifie [[String]] ListesDispo String
 
-data Player = Humain | Ordi1 | Ordi2 deriving (Eq)
+data Player = Humain | Ordi1 | Ordi2
+    deriving (Eq, Show)
+
+data Deck = Deck Player [String]
+    deriving (Show)
+
+data ListesDispo = ListesDispo Deck Deck
+    deriving (Show)
+
+
+--type PiecesJoueur = [String] 
+--type PiecesOrdi1 = [String]
+--type PiecesJoueur2 = [String] 
+--type PiecesOrdi2 = [String] 
+
+
+--data Deck = Deck Player [String] deriving (Show)
+
 
 diffTaillePiece = ["B", "M", "S", "T"]
 
-data ListesDispo = ListesDispo String [String] [String] [String] [String] [String] [String] [String] [String]
+--data ListesDispo = ListesDispo Deck Deck
 
 
 -- Fonction pour alterner les joueurs
@@ -28,7 +45,7 @@ afficheJeuQuandOrdiFinit Ordi1 jeu = print jeu
 
 
 
-
+{--
 drop1 :: Player -> [[String]] -> String -> Int -> Int -> ListeModifie -> ListesDispo -> ListeModifie
 drop1 joueur jeu taille x y (ListeModifie jeu1 listePieceDepart pieceAJouer1) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
   | taille `elem` diffTaillePiece =
@@ -50,6 +67,25 @@ drop1 joueur jeu taille x y (ListeModifie jeu1 listePieceDepart pieceAJouer1) (L
         jeu1 = modifierCase2D jeu pieceAJouer x y
     in ListeModifie jeu1 newListePiece pieceAJouer
   | otherwise = ListeModifie [[]] ["pas bon"] ""
+ --}
+ 
+ 
+drop1 :: Player -> [[String]] -> Int -> Int -> ListeModifie -> ListeModifie
+drop1 joueur jeu x y (ListeModifie jeu1 (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) =
+  let (pieceAJouer2, nouveauDeckHumain, nouveauDeckOrdi1) = case joueur of
+        Humain -> (head deckHumain, tail deckHumain, deckOrdi1)
+        Ordi1 -> (head deckOrdi1, deckHumain, tail deckOrdi1)
+      jeu1 = modifierCase2D jeu pieceAJouer2 x y
+  in ListeModifie jeu1 (ListesDispo (Deck Humain nouveauDeckHumain) (Deck Ordi1 nouveauDeckOrdi1)) pieceAJouer2
+
+
+
+topDeckJoueur :: Deck -> Deck
+topDeckJoueur (x:xs) = x  -- Pour le joueur Humain, retire la tête de la liste
+
+
+
+
 
 
 {--
