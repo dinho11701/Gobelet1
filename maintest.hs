@@ -63,23 +63,6 @@ messageBienvenue = do
 
 
 
-{--
-drop1 :: Player -> String -> Int -> Int -> ListeModifie
-drop1 taille x y
-  | taille `elem` diffTaillePiece =
-    let (pieces, diffPieceJoueur) = case taille of
-          "B" -> (listeBUser, listeBUser)
-          "M" -> (listeMUser, listeMUser)
-          "S" -> (listeSUser, listeSUser)
-          "T" -> (listeTUser, listeTUser)
-          _   -> ([], ["pas bon"])
-        pieceAJouer = retirerTeteListe pieces
-        newListePiece = prendResteListe diffPieceJoueur
-        jeu1 = modifierCase2D jeu pieceAJouer x y
-    in ListeModifie jeu1 newListePiece
-  | otherwise = ListeModifie [[]] ["pas bon"]
-
---}
 onboard :: [[String]] -> Int -> Int -> Int -> Int -> [[String]]
 onboard jeuDepart y1 x1 y2 x2
   | x1 < 0 || x1 >= length jeuDepart || y1 < 0 || y1 >= length (jeuDepart !! 0) || x2 < 0 || x2 >= length jeuDepart || y2 < 0 || y2 >= length (jeuDepart !! 0) = jeuDepart
@@ -570,8 +553,8 @@ retourePieceAUnePosition :: [[String]] -> Int -> Int -> String
 retourePieceAUnePosition jeu x y = jeu !! x !! y
 
 
-lancerPartie :: Player -> Int -> ListeModifie -> ListesDispo -> [[DictionnairePiece]] -> IO ()
-lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D = do
+lancerPartie :: Player -> Int -> ListeModifie -> [[DictionnairePiece]] -> IO ()
+lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D = do
     --let fin = quiAGagne joueur
     --putStrLn fin
     --let joueurSuivant = alternerJoueurs joueur 
@@ -615,19 +598,20 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                             --printList2DDictio liste2D
 
                             --verifie ordre des tailles avant de jouer ds le deck
-                            let bonOrdre = piecePrisDansBonOrdre joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                            
+                            let bonOrdre = piecePrisDansBonOrdre joueur tt (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) "")
                             
                             if bonOrdre == "oui"
                                 then do 
                                     
-                                    let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                    --let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                
+                                    let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
                                 --(ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                    let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2D
-                                    let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                    let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
+                                    --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                         --let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2DAvecDictionnaire
                                     putStrLn "biiien tu as affichee"
-                                    print pieceAJouer
+                                    print pieceAJouer2
                                     printList2DDictio newListe2DDictio
                                     --putStrLn "ici taffiches hein"
                                     
@@ -635,11 +619,11 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                     --print listeMU
                                     --regler plus tard le cas ou une des listes est vide
                                     
-                                    lancerPartie joueur tour (ListeModifie jeuUpdate newListe pieceAJouer) (ListesDispo "" liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) newListe2DDictio
+                                    lancerPartie joueur tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
                                     
                             else do 
-                                putStrLn "cest pas un ordre resprcté recommence"
-                                lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                                putStrLn "cest pas un ordre aproprié, on recommence"
+                                lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
                                 
                     
 
@@ -647,7 +631,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                     --cas onboard     
                     else do 
                         putStrLn "tu peux pas déplacer de pieces, cest un tab vide"
-                        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                        lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
             else do 
                 putStrLn "ook ca devient interressant"
                 
@@ -656,7 +640,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                     then do
                     
                         --verifie ordre des tailles avant de jouer ds le deck
-                        let bonOrdre = piecePrisDansBonOrdre joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                        let bonOrdre = piecePrisDansBonOrdre joueur tt (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) "")
                         
                         if bonOrdre == "oui"
                             then do
@@ -700,7 +684,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                         if pieceACetteTaille == ""
                                             then do 
                                                 putStrLn "categorie chosit vide, rejoue avec une autre"
-                                                lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                                                lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) liste2D
         
                                         else do
                                             let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste pieceACettePosition) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
@@ -726,42 +710,34 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                                 
                                     putStrLn "to bad case non vide, faut gober"
                                     
-                                    let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-        
                                     
-                                    --let pieceACetteTaille = length liste
-                                    --print liste
-                                    if pieceACetteTaille == ""
-                                        then do 
-                                            putStrLn "categorie chosit vide, rejoue avec une autre"
-                                            lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
-        
-                                    else do
+                                    --recuere piece a cette taille tt 
                                     
-                                        putStrLn "categorie good"
-                                        --let pieceACetteTaille = retournePieceCorrespondante joueur tt (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                    --je fais juste recuperer la piec de tt qui sera pieceACetteTaille
+                                    
+                                    let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
                                         
                                         
-                                        
-                                        let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
-                                        
-                                        
-                                        let (ListeModifie jeuNew newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste pieceACetteTaille) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D
-                                        
-                                        let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        printList2DDictio newListe2DDictio
-                                        print jeuNew
-                                        
-                                        putStrLn "liste categorie a la fin:"
-                                        print newListe 
-                                        
-                                        lancerPartie joueur tour (ListeModifie jeuNew newListe pieceAJouer) (ListesDispo message liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) newListe2DDictio
+                                    let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate tt y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1)
+                                    let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D
+                                    
+                                    --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                    printList2DDictio newListe2DDictio
+                                    print jeuNew
+                                    
+                                    putStrLn "liste categorie a la fin:"
+                                    print newListe 
+                                    
+                                    lancerPartie joueur tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
 
+                                    
+                                        
+                                        
+                                        
                                 
                         else do 
                             putStrLn "l'ordre des pieces n'est pas respecté, recommence"
-                            lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                            lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) liste2D
 
                 else do
                     --onboard((0, 2), (2, 1))
@@ -773,7 +749,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
                     if estUneCaseVide piecePositionDepart
                         then do 
                             putStrLn "cas onboard: recommence, tu peux pas déplacer car ya pas de piece à cette case"
-                            lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+                            lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) liste2D 
                     else do 
                         -- no vide
                         --recupere taille de piece a cette position
@@ -857,7 +833,7 @@ lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message lis
 
     else do 
         putStrLn "cest chaud faut recommencer"
-        lancerPartie joueur tour (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) liste2D
+        lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) liste2D
     
     
 
@@ -929,8 +905,8 @@ main = do
             --let j1 = onboard jeu 0 2 2 1 
             --print j1
             
-            
-            lancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
+            let initialListeModifie = ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) ""
+            lancerPartie Humain 0 initialListeModifie go
             
             
         
@@ -941,9 +917,13 @@ main = do
             let go = liste2DAvecDictionnaire
             printList2DDictio go
             
+            let initialListeModifie = ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) ""
+            lancerPartie Humain 0 initialListeModifie go
+            
             --let j1 = onboard jeu 0 2 2 1 
             --print j1
-            lancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
+            --ancerPartie Humain 0 (ListeModifie jeu [] "") (ListesDispo "" listeUserBig listeUserMedium listeUserSmall listeUserTiny listeOrdiBig listeOrdiMedium listeOrdiSmall listeOrdiTiny) go
+            --lancerPartie Humain 0 (ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) "") go            
     
     
     
