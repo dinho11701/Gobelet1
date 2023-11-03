@@ -14,6 +14,10 @@ data ListesDispo = ListesDispo Deck Deck
     deriving (Show)
 
 
+let deckHumain = ["X3", "X2", "X1", "X0"]
+let deckOrdi1 = ["O3", "O2", "O1", "O0"]
+
+
 --type PiecesJoueur = [String] 
 --type PiecesOrdi1 = [String]
 --type PiecesJoueur2 = [String] 
@@ -143,7 +147,7 @@ recupereTailleCorrespondante piece
     | piece == "X0" || piece == "O0" = "T"
     | otherwise = "Taille inconnue"
 
-
+{--
 piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
 piecePrisDansBonOrdre Humain "T" (ListesDispo _ listeBU listeMU listeSU listeTU _ _ _ _)
     | null listeBU && null listeMU && null listeSU = "oui"
@@ -170,6 +174,13 @@ piecePrisDansBonOrdre Ordi1 "B" (ListesDispo _ _ _ _ _ listeBO _ _ _)
     | not (null listeBO) = "oui"
     | otherwise = "non"
 piecePrisDansBonOrdre _ _ _ = "non"
+--}
+
+piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
+piecePrisDansBonOrdre joueur taille (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1) "")
+  | joueur == Humain && taille `elem` diffTaillePiece && taille == head deckHumain = "oui"
+  | joueur == Ordi1 && taille `elem` diffTaillePiece && taille == head deckOrdi1 = "oui"
+  | otherwise = "non"
 
 
 
