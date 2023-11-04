@@ -511,6 +511,23 @@ main = do
     
 --}
 
+vaJouerSurUneCaseAdverse :: [Int] -> [Int] -> Bool
+vaJouerSurUneCaseAdverse _ [] = False
+vaJouerSurUneCaseAdverse listeXYJoueurActuel (x:y:xs) 
+    | (listeXYJoueurActuel !! 0) == x && (listeXYJoueurActuel !! 1) == y = True 
+    | otherwise = vaJouerSurUneCaseAdverse listeXYJoueurActuel xs
+
+
+
+existence1Align3 :: [Int] -> [Int] -> String
+existence1Align3 listePosPieceJr listeNbALign3 = do 
+    let listeNbALign3 = compteAvecListeComplete listePosPieceJr listePosPieceJr listeNbALign3
+    let existe1ALign3 = any (\x -> x == 1) listeNbALign3
+                
+    if existe1ALign3 
+        then "oui gros ya 1 align de 3"
+        else "non"
+
 
 
 retourePieceAUnePosition :: [[String]] -> Int -> Int -> String
@@ -569,26 +586,33 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                             
                             if bonOrdre == "oui"
                                 then do 
-                                    
-                                    --let (ListeModifie jeuUpdate newListe pieceAJouer) = drop1 joueur jeu tt y1 x1 (ListeModifie jeu liste piece) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
                                 
-                                    let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
-                                --(ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                    let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
-                                    --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        --let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2DAvecDictionnaire
-                                    putStrLn "biiien tu as affichee"
-                                    print pieceAJouer2
-                                    printList2DDictio newListe2DDictio
-                                    --putStrLn "ici taffiches hein"
-                                    
-                                    print jeuUpdate
-                                    --print listeMU
-                                    --regler plus tard le cas ou une des listes est vide
-                                    print newdecHum
-                                    
-                                    lancerPartie joueur tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
-                                    
+                                
+                                    let (listePosPiecHumain,listePosPiecOrd1) = creerListeCoordPieces jeu [] [] 0 0
+                                    --print listePosPiecHumain
+                                    let joueurAdversePossedAlign3 = existence1Align3 [1,1,2,2,3,3] []
+                                    if joueurAdversePossedAlign3 == "non"
+                                        then do
+                                            
+                                            --place sur une case vide (le tab est vide so pas besoin de verifier si case quil veut jouer est vide) 
+
+                                            let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
+                                            let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
+                                            print pieceAJouer2
+                                            printList2DDictio newListe2DDictio
+                                            print jeuUpdate
+                                            lancerPartie joueur tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
+                                            
+                                        
+                                    else do 
+                                        putStrLn "chaud patates faut placer sur une des cases du jr adverse"
+                                        --compare le xy de drop avec listePiecesJrAdvers
+                                        --si vaJouerSurUneCaseAdverse listePiecesJrAdvers est True , joue normalement
+                                        --sinon redemande en disant joueur actuel doit jouer sur case jr adverse
+                                        
+                                        --if vaJouerSurUneCaseAdverse 
+                                        
+
                             else do 
                                 
                                 putStrLn "cest pas un ordre aproprié, on recommence"
@@ -809,6 +833,16 @@ main = do
             --onboard((0, 2), (2, 1)) placer tel quel
             --let j1 = onboard jeu 0 2 2 1 
             --print j1
+            
+            
+            --let test2 = [0,0,4,4,1,1,1,2,1,3,7,7,2,2,0,1,0,2]
+            --let goo = compteAvecListeComplete test2 test2 []
+            
+            --print goo
+            
+            let hehe = vaJouerSurUneCaseAdverse [1,1] [0,1,1,2,3,3]
+            print hehe
+            
             
             let initialListeModifie = ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) ""
             lancerPartie Humain 0 initialListeModifie go
