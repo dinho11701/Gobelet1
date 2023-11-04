@@ -14,8 +14,8 @@ data ListesDispo = ListesDispo Deck Deck
     deriving (Show)
 
 
-let deckHumain = ["X3", "X2", "X1", "X0"]
-let deckOrdi1 = ["O3", "O2", "O1", "O0"]
+deckHumain = ["X3", "X2", "X1", "X0","X3", "X2", "X1", "X0","X3", "X2", "X1", "X0"]
+deckOrdi1 = ["O3", "O2", "O1", "O0","O3", "O2", "O1", "O0","O3", "O2", "O1", "O0"]
 
 
 --type PiecesJoueur = [String] 
@@ -49,94 +49,16 @@ afficheJeuQuandOrdiFinit Ordi1 jeu = print jeu
 
 
 
-{--
-drop1 :: Player -> [[String]] -> String -> Int -> Int -> ListeModifie -> ListesDispo -> ListeModifie
-drop1 joueur jeu taille x y (ListeModifie jeu1 listePieceDepart pieceAJouer1) (ListesDispo message listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-  | taille `elem` diffTaillePiece =
-    let (pieces, diffPieceJoueur) = case joueur of
-          Humain -> case taille of
-            "B" -> (listeBU, listeBU)
-            "M" -> (listeMU, listeMU)
-            "S" -> (listeSU, listeSU)
-            "T" -> (listeTU, listeTU)
-            _   -> ([], ["pas bon"])
-          Ordi1 -> case taille of
-            "B" -> (listeBO, listeBO)
-            "M" -> (listeMO, listeMO)
-            "S" -> (listeSO, listeSO)
-            "T" -> (listeTO, listeTO)
-            _   -> ([], ["pas bon"])
-        pieceAJouer = retirerTeteListe pieces
-        newListePiece = prendResteListe diffPieceJoueur
-        jeu1 = modifierCase2D jeu pieceAJouer x y
-    in ListeModifie jeu1 newListePiece pieceAJouer
-  | otherwise = ListeModifie [[]] ["pas bon"] ""
- --}
- 
  
 drop1 :: Player -> [[String]] -> Int -> Int -> ListeModifie -> ListeModifie
-drop1 joueur jeu x y (ListeModifie jeu1 (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) pieceAJouer1) =
+drop1 joueur jeu x y (ListeModifie jeu1 (ListesDispo (Deck Humain deckH) (Deck Ordi1 deckO1)) pieceAJouer1) =
   let (pieceAJouer2, nouveauDeckHumain, nouveauDeckOrdi1) = case joueur of
-        Humain -> (head deckHumain, tail deckHumain, deckOrdi1)
-        Ordi1 -> (head deckOrdi1, deckHumain, tail deckOrdi1)
+        Humain -> (head deckH, tail deckH, deckO1)
+        Ordi1 -> (head deckO1, deckH, tail deckO1)
       jeu1 = modifierCase2D jeu pieceAJouer2 x y
   in ListeModifie jeu1 (ListesDispo (Deck Humain nouveauDeckHumain) (Deck Ordi1 nouveauDeckOrdi1)) pieceAJouer2
 
 
-
-topDeckJoueur :: Deck -> Deck
-topDeckJoueur (x:xs) = x  -- Pour le joueur Humain, retire la tête de la liste
-
-
-
-
-
-
-{--
-drop1 :: Player -> [[String]] -> String -> Int -> Int -> ListeModifie -> ListesDispo -> (ListeModifie, ListesDispo)
-drop1 joueur jeu taille x y (ListeModifie jeu1 newListePiece pieceAJouer) (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-  | taille `elem` diffTaillePiece =
-    let (pieces, diffPieceJoueur) = case joueur of
-          Humain -> case taille of
-            "B" -> (listeBU, listeBU)
-            "M" -> (listeMU, listeMU)
-            "S" -> (listeSU, listeSU)
-            "T" -> (listeTU, listeTU)
-            _   -> ([], ["pas bon"])
-        in if length pieces == 0
-             then ((ListeModifie jeu [] ""), (ListesDispo "choisis une autre catégorie" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO))
-             else
-               let pieceAJouer = retirerTeteListe pieces
-                   newListePiece = prendResteListe diffPieceJoueur
-                   jeu1 = modifierCase2D jeu pieceAJouer x y
-                   listeDispoApres = case taille of
-                     "B" -> ListesDispo "" newListePiece listeMU listeSU listeTU listeBO listeMO listeSO listeTO
-                     "M" -> ListesDispo "" listeBU newListePiece listeSU listeTU listeBO listeMO listeSO listeTO
-                     "S" -> ListesDispo "" newListePiece listeMU newListePiece listeTU listeBO listeMO listeSO listeTO
-                     "T" -> ListesDispo "" newListePiece listeMU listeSU newListePiece listeBO listeMO listeSO listeTO
-               in (ListeModifie jeu1 newListePiece pieceAJouer, listeDispoApres)
-{--          Ordi1 -> case taille of
-            "B" -> (listeBO, listeBO)
-            "M" -> (listeMO, listeMO)
-            "S" -> (listeSO, listeSO)
-            "T" -> (listeTO, listeTO)
-            _   -> ([], ["pas bon"])
-        in if length pieces == 0
-             then ((ListeModifie jeu [] ""), (ListesDispo "choisis une autre catégorie" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO))
-             else
-               let pieceAJouer = retirerTeteListe pieces
-                   newListePiece = prendResteListe diffPieceJoueur
-                   jeu1 = modifierCase2D jeu pieceAJouer x y
-                   listeDispoApres = case taille of
-                     "B" -> ListesDispo "" listeBU listeMU listeSU listeTU newListePiece listeMO listeSO listeTO
-                     "M" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO newListePiece listeSO listeTO
-                     "S" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO newListePiece listeTO
-                     "T" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO newListePiece--}
-               --in (ListeModifie jeu1 newListePiece pieceAJouer, listeDispoApres)--}
-               
-
---retournePieceCorrespondante :: Player -> ListesDispo -> [String]
---retournePieceCorrespondante joueur (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) =
 
 
 recupereTailleCorrespondante :: String -> String
@@ -147,124 +69,34 @@ recupereTailleCorrespondante piece
     | piece == "X0" || piece == "O0" = "T"
     | otherwise = "Taille inconnue"
 
-{--
-piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
-piecePrisDansBonOrdre Humain "T" (ListesDispo _ listeBU listeMU listeSU listeTU _ _ _ _)
-    | null listeBU && null listeMU && null listeSU = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Humain "S" (ListesDispo _ listeBU listeMU listeSU listeTU _ _ _ _)
-    | null listeBU && null listeMU = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Humain "M" (ListesDispo _ listeBU _ _ _ _ _ _ _)
-    | null listeBU = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Humain "B" (ListesDispo _ listeBU _ _ _ _ _ _ _)
-    | not (null listeBU) = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Ordi1 "T" (ListesDispo _ _ _ _ _ listeBO listeMO listeSO listeTO)
-    | null listeBO && null listeMO && null listeSO = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Ordi1 "S" (ListesDispo _ _ _ _ _ listeBO listeMO _ _)
-    | null listeBO && null listeMO = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Ordi1 "M" (ListesDispo _ _ _ _ _ listeBO _ _ _)
-    | null listeBO = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre Ordi1 "B" (ListesDispo _ _ _ _ _ listeBO _ _ _)
-    | not (null listeBO) = "oui"
-    | otherwise = "non"
-piecePrisDansBonOrdre _ _ _ = "non"
---}
+
 
 piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
-piecePrisDansBonOrdre joueur taille (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1) "")
-  | joueur == Humain && taille `elem` diffTaillePiece && taille == head deckHumain = "oui"
-  | joueur == Ordi1 && taille `elem` diffTaillePiece && taille == head deckOrdi1 = "oui"
+piecePrisDansBonOrdre joueur taille (ListesDispo (Deck Humain deckH) (Deck Ordi1 deckO1))
+  | joueur == Humain && taille `elem` diffTaillePiece && (head deckH) == retournePieceCorrespondante Humain taille = "oui"
+  | joueur == Ordi1 && taille `elem` diffTaillePiece && (head deckO1) == retournePieceCorrespondante Ordi1 taille = "oui"
   | otherwise = "non"
 
 
-
-
-retournePieceCorrespondante :: Player -> String -> ListesDispo -> String
-retournePieceCorrespondante Humain "B" (ListesDispo "" listeBU _ _ _ _ _ _ _) = trace "aaa" $
-    if not (null listeBU) then head listeBU else ""
-retournePieceCorrespondante Humain "M" (ListesDispo "" _ listeMU _ _ _ _ _ _) = 
-    if not (null listeMU) then head listeMU else ""
-retournePieceCorrespondante Humain "S" (ListesDispo "" _ _ listeSU _ _ _ _ _) = 
-    if not (null listeSU) then head listeSU else ""
-retournePieceCorrespondante Humain "T" (ListesDispo "" _ _ _ listeTU _ _ _ _) = 
-    if not (null listeTU) then head listeTU else ""
-retournePieceCorrespondante Ordi1 "B" (ListesDispo "" _ _ _ _ listeBO _ _ _) = 
-    if not (null listeBO) then head listeBO else ""
-retournePieceCorrespondante Ordi1 "M" (ListesDispo "" _ _ _ _ _ listeMO _ _) = 
-    if not (null listeMO) then head listeMO else ""
-retournePieceCorrespondante Ordi1 "S" (ListesDispo "" _ _ _ _ _ _ listeSO _) = 
-    if not (null listeSO) then head listeSO else ""
-retournePieceCorrespondante Ordi1 "T" (ListesDispo "" _ _ _ _ _ _ _ listeTO) = 
-    if not (null listeTO) then head listeTO else ""
-retournePieceCorrespondante _ _ _ = []  -- Cas par défaut, retourne une liste vide
+retournePieceCorrespondante :: Player -> String -> String
+retournePieceCorrespondante Humain "B" = "X3"
+retournePieceCorrespondante Humain "M" = "X2"
+retournePieceCorrespondante Humain "S" = "X1"
+retournePieceCorrespondante Humain "T" = "X0"
+retournePieceCorrespondante Ordi1 "B" = "O3"
+retournePieceCorrespondante Ordi1 "M" = "O2"
+retournePieceCorrespondante Ordi1 "S" = "O1"
+retournePieceCorrespondante Ordi1 "T" = "O0"
 
 
 
-modifierListeDispo :: Player -> String -> [String] -> ListesDispo -> ListesDispo
-modifierListeDispo joueur taille newListePiece (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-  | joueur == Humain =
-    case taille of
-      "B" -> ListesDispo "" newListePiece listeMU listeSU listeTU listeBO listeMO listeSO listeTO
-      "M" -> ListesDispo "" listeBU newListePiece listeSU listeTU listeBO listeMO listeSO listeTO
-      "S" -> ListesDispo "" listeBU listeMU newListePiece listeTU listeBO listeMO listeSO listeTO
-      "T" -> ListesDispo "" listeBU listeMU listeSU newListePiece listeBO listeMO listeSO listeTO
-      _ -> error "Taille non valide pour Humain"
-  | joueur == Ordi1 =
-    case taille of
-      "B" -> ListesDispo "" listeBU listeMU listeSU listeTU newListePiece listeMO listeSO listeTO
-      "M" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO newListePiece listeSO listeTO
-      "S" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO newListePiece listeTO
-      "T" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO newListePiece
-      _ -> error "Taille non valide pour Ordi1"
-  | joueur == Ordi2 =
-    case taille of
-      "B" -> ListesDispo "" listeBU listeMU listeSU listeTU newListePiece listeMO listeSO listeTO
-      "M" -> ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO
-      _ -> error "Taille non valide pour Ordi2"
-  | otherwise = error "Joueur non valide"
 
 
-              {--Ordi1 -> case taille of
-                "B" -> (listeBO, listeBO)
-                "M" -> (listeMO, listeMO)
-                "S" -> (listeSO, listeSO)
-                "T" -> (listeTO, listeTO)
-                _   -> ([], ["pas bon"])
-            pieceAJouer = retirerTeteListe pieces
-            newListePiece = prendResteListe diffPieceJoueur
-            jeu1 = modifierCase2D jeu pieceAJouer x y
-            case taille of 
-                "B" -> ((ListeModifie jeu1 newListePiece pieceAJouer),(ListesDispo "" listeBU listeMU listeSU listeTU newListePiece listeMO listeSO listeTO))
-                "M" -> ((ListeModifie jeu1 newListePiece pieceAJouer),(ListesDispo "" listeBU listeMU listeSU listeTU listeBO newListePiece listeSO listeTO))
-                "S" -> ((ListeModifie jeu1 newListePiece pieceAJouer),(ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO newListePiece listeTO))
-                "T" -> ((ListeModifie jeu1 newListePiece pieceAJouer),(ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO newListePiece))--}
+
         
 
 
 
-  
-{--
-drop1 :: Player -> String -> Int -> Int -> ListeModifie
-drop1 Ordi1 taille x y
-  | taille `elem` diffTaillePiece =
-    let (pieces, diffPieceJoueur) = case taille of
-          "B" -> (listeBComp, listeBComp)
-          "M" -> (listeMComp, listeMComp)
-          "S" -> (listeSComp, listeSComp)
-          "T" -> (listeTComp, listeTComp)
-          _   -> ([], ["pas bon"])
-        pieceAJouer = retirerTeteListe pieces
-        newListePiece = prendResteListe diffPieceJoueur
-        jeu1 = modifierCase2D jeu pieceAJouer x y
-    in ListeModifie jeu1 newListePiece
-  | otherwise = ListeModifie [[]] ["pas bon"]
---}
 
 --meilleur version , plus clean
 modifierCase2D :: [[a]] -> a -> Int -> Int -> [[a]]
