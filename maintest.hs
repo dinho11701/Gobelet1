@@ -529,6 +529,11 @@ existence1Align3 listePosPieceJr listeNbALign3 = do
         else "non"
 
 
+determinerJoueurActuel :: Player -> String
+determinerJoueurActuel Humain = "Humain"
+determinerJoueurActuel Ordi1 = "Ordi1"
+
+
 
 retourePieceAUnePosition :: [[String]] -> Int -> Int -> String
 retourePieceAUnePosition jeu x y = jeu !! x !! y
