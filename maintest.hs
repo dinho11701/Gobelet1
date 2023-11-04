@@ -281,42 +281,6 @@ goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoord
         Nothing -> InfosJeu "piece abscente" jeu listeCoordJr1 listeCoordJr2 liste2DDict x2 y2 i
 
 
-{- 
-userInfo <- resaisirCoup
-                let parsedMoves = parseMoves userInfo
-                case recupererDropOuOnboardInfo parsedMoves of
-                    Just (size, x1, y1, x2, y2) -> do
-                        let taille = transformeSizeEnString size
-                        goberUnePiece taille piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
--}
-
-{--
-goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> InfosJeu
-goberUnePiece taillePieceWantPlay piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i = do
-    -- Récupère la taille de la pièce à cette position
-    let taillePieceDsJeu = recupererCleTeteDictio x y liste2DAvecDictionnaire
-    case taillePieceDsJeu of
-        Just taillePieceDsJeu ->
-            | estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu =
-                -- Si gobable, effectue les opérations et retourne les informations du jeu
-                let newJeu = joue jeu piece x y
-                    (ListeCoord posPieceJr posPieceOrdi) = creerListeCoordPieces newJeu [] [] 0 0
-                    newListe2DDictio = addToDictionaryIn2DList x y taillePieceWantPlay piece liste2DAvecDictionnaire
-                in InfosJeu "gober" newJeu listeCoordJr1 listeCoordJr2 newListe2DDictio x y i
-            | otherwise =
-                -- Si non gobable, récupère de nouvelles données et rappelle la fonction
-                userInfo <- resaisirCoup
-                let parsedMoves = parseMoves userInfo
-                case recupererDropOuOnboardInfo parsedMoves of
-                    Just (size, x1, y1, x2, y2) -> do 
-                        let taille = transformeSizeEnString size
-                        in goberUnePiece taille piece jeu liste2DAvecDictionnaire listeCoordJr1 listeCoordJr2 x y i
-                    Nothing -> InfosJeu "" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
-        Nothing -> InfosJeu "" jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
-            -- Si la taille n'a pas été trouvée, retourne les informations du jeu avec une chaîne vide
-   --}         
-
-
 
 estUnJeuVide :: [[String]] -> Bool
 estUnJeuVide jeu = all (\row -> all (== "__") row) jeu
@@ -678,25 +642,29 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                                 else do
                                 
                                     putStrLn "to bad case non vide, faut gober"
-                                    
+                                    --est une piece gobable?
                                     
                                     --recuere piece a cette taille tt 
                                     --je fais juste recuperer la piec de tt qui sera pieceACetteTaille
                                     let pieceACetteTaille = retournePieceCorrespondante joueur tt
-                                    
                                     let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
+                            
+                                    if messageN == "non gobable"
+                                        then do
+                                            print messageN
+                                            putStrLn "tu ne peux pas gober cette piece, recommence"
+                                            lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
                                         
+                                    else do 
+                                        let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
+                                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D 
                                         
-                                    let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
-                                    let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D 
-                                    
-                                    --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                    printList2DDictio newListe2DDictio
-                                    print jeuNew
-                                    
-                                    lancerPartie joueur tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
-
-                                
+                                        --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                        printList2DDictio newListe2DDictio
+                                        print jeuNew
+                                        
+                                        lancerPartie joueur tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
+                                        
                         else do 
                             putStrLn "l'ordre des pieces n'est pas respecté, recommence"
                             lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
@@ -743,17 +711,28 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                                 
                         else do 
                             print "piece a case finale a gober quand on deplace"
+                            
                             let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece taillePiece piecePositionDepart jeu liste2D [] [] x1 y1 x2 y2 0
-                            --retirer en utilisant onboard ds la fonction gober pour le jeu 
-                            --retirer en utilisant removeKey ici 
-                            let pieceEtListDictio = removeKeyValueAtPosition x1 y1 taillePiece updatedList
-    
-                            case pieceEtListDictio of
-                              Just ((cleEnlevee, valeurEnlevee), liste2DUpdate) -> do
-                                print jeuUpdate
-                                printList2DDictio liste2DUpdate
-                                lancerPartie joueur tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2DUpdate
-                              Nothing -> putStrLn "chaud"
+                            
+                            if messageN == "non gobable"
+                                then do
+                                    print messageN
+                                    putStrLn "tu ne peux pas gober cette piece, recommence"
+                                    lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
+                                
+                            else do 
+                                --retirer en utilisant onboard ds la fonction gober pour le jeu 
+                                --retirer en utilisant removeKey ici 
+                                let pieceEtListDictio = removeKeyValueAtPosition x1 y1 taillePiece updatedList
+                                case pieceEtListDictio of
+                                  Just ((cleEnlevee, valeurEnlevee), liste2DUpdate) -> do
+                                    print jeuUpdate
+                                    printList2DDictio liste2DUpdate
+                                    lancerPartie joueur tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2DUpdate
+                                  Nothing -> putStrLn "chaud"
+                            
+                            
+                            
 
 
 
