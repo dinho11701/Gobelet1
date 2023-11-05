@@ -13,8 +13,10 @@ data InfosJeu = InfosJeu String [[String]] [Int] [Int] [[DictionnairePiece]] Int
 -- dict2D 
 -- listeRestantes
 
+data InfosMeilleurCoup = InfosMeilleurCoup Int Int Int 
 
-jeu = [ ["__", "__", "__", "__"]
+
+jeu = [ ["__", "O3", "O2", "__"]
                   , ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"] ]
@@ -532,6 +534,32 @@ existence1Align3 listePosPieceJr listeNbALign3 = do
             then "oui gros ya 1 align de 3"
             else "non"--}
             
+            
+            
+        {--| let piecePositionDepart = retourePieceAUnePosition jeu y1 x1
+                    print piecePositionDepart
+                        --cas onboard case de depart
+                    if estUneCaseVide piecePositionDepart--}
+
+
+
+faireSonMeilleurCoup :: Player -> [[String]] -> [String] -> InfosMeilleurCoup -> InfosMeilleurCoup
+faireSonMeilleurCoup joueur jeu deckOrd1 (InfosMeilleurCoup i j score)
+    | joueur == Ordi1 =
+        let casee = retourePieceAUnePosition jeu 0 0
+        in
+        if estUneCaseVide casee
+            then
+                let jeu1 = modifierCase2D jeu (head deckOrd1) 0 0
+                    (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu1 [] [] 0 0
+                    nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
+                    nbALign2 = 
+                in InfosMeilleurCoup 0 0 nbALign3
+        else InfosMeilleurCoup (-1) (-1) (-1)
+    | otherwise = InfosMeilleurCoup (-1) (-1) (-1)
+
+
+            
 existence1Align3 :: [Int] -> [Int] -> String
 existence1Align3 [] _ = "non"
 existence1Align3 listePosPieceJr listeNbALign3 = do
@@ -920,6 +948,10 @@ main = do
             
             let res = existence1Align3 [] []
             print res 
+            --faireSonMeilleurCoup joueur jeu deckOrd1 (InfosMeilleurCoup i j)
+            
+            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoup Humain jeu deckOrdi1 (InfosMeilleurCoup 0 0 0) 
+            print score
             
             
             let initialListeModifie = ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) ""
@@ -931,6 +963,14 @@ main = do
 
         else do
             putStrLn "as vide"
+            
+            let f = sum (compteAvecListeComplete [0,0,1,0,2,0] [0,0,1,0,2,0] [])
+            print f 
+            
+            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoup Ordi1 jeu deckOrdi1 (InfosMeilleurCoup 0 0 0) 
+            print score
+            
+            
             let go = liste2DAvecDictionnaire
             printList2DDictio go
             
