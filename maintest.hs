@@ -518,15 +518,30 @@ vaJouerSurUneCaseAdverse listeXYJoueurActuel (x:y:xs)
     | otherwise = vaJouerSurUneCaseAdverse listeXYJoueurActuel xs
 
 
-
+{--
 existence1Align3 :: [Int] -> [Int] -> String
 existence1Align3 listePosPieceJr listeNbALign3 = do 
-    let listeNbALign3 = compteAvecListeComplete listePosPieceJr listePosPieceJr listeNbALign3
-    let existe1ALign3 = any (\x -> x == 1) listeNbALign3
-                
+
+    if (length listePosPieceJr) == 0 
+        then "non"
+    else do 
+        let listeNbALign3 = compteAvecListeComplete listePosPieceJr listePosPieceJr listeNbALign3
+        let existe1ALign3 = any (\x -> x == 1) listeNbALign3
+                    
+        if existe1ALign3 
+            then "oui gros ya 1 align de 3"
+            else "non"--}
+            
+existence1Align3 :: [Int] -> [Int] -> String
+existence1Align3 [] _ = "non"
+existence1Align3 listePosPieceJr listeNbALign3 = do
+    let listeNbALign3' = compteAvecListeComplete listePosPieceJr listePosPieceJr listeNbALign3
+    let existe1ALign3 = any (\x -> x == 1) listeNbALign3'
+    
     if existe1ALign3 
         then "oui gros ya 1 align de 3"
         else "non"
+
 
 
 determinerJoueurActuel :: Player -> String
@@ -540,16 +555,23 @@ voiciLeJoueurAdverse Ordi1 = Humain
 
 
 
+retourneListePieceAdversaire :: Player -> [Int] -> [Int] -> [Int]
+retourneListePieceAdversaire joueurAdverse listePosPiecHumain listePosPiecOrd1
+    | joueurAdverse == Humain = listePosPiecHumain
+    | joueurAdverse == Ordi1 = listePosPiecOrd1
+    | otherwise = []
 
-peutFaireSonCoup :: Player -> String
-peutFaireSonCoup joueur = do
+
+
+peutFaireSonCoup :: String -> [Int] -> [Int] -> [Int] -> String
+peutFaireSonCoup joueurActuel xyDuDrop listePosPiecHumain listePosPiecOrd1 = do
     if joueurActuel == "Humain"
         then do 
-            if vaJouerSurUneCaseAdverse [x1,y1] listePosPiecOrd1
+            if vaJouerSurUneCaseAdverse xyDuDrop listePosPiecOrd1
                 then "oui il va jouer sur une case de adversaire"
             else "noon"
     else do 
-        if vaJouerSurUneCaseAdverse [x1,y1] listePosPiecHumain
+        if vaJouerSurUneCaseAdverse xyDuDrop listePosPiecHumain
             then "oui il va jouer sur une case de adversaire"
         else "noon"
 
@@ -563,6 +585,8 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
     --let fin = quiAGagne joueur
     --putStrLn fin
     let joueurSuivant = alternerJoueurs joueur 
+    let playerNow = quiJoueNow joueur
+    print playerNow
     
     putStrLn "Informations de l'utilisateur :"
     userInfo <- resaisirCoup
@@ -599,14 +623,11 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                 then do 
                     if estCasDrop [x2,y2] 
                         then do 
-                            --printList2DDictio liste2D
-
                             --verifie ordre des tailles avant de jouer ds le deck 
                             print tt
                             print decHum
                             let bonOrdre = piecePrisDansBonOrdre joueur tt (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1))
-                            --print decHum
-                            
+
                             if bonOrdre == "oui"
                                 then do 
                                 
@@ -617,7 +638,6 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                                     print jeuUpdate
                                     lancerPartie joueurSuivant tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
                                     
-
                             else do 
                                 
                                 putStrLn "cest pas un ordre aproprié, on recommence"
@@ -628,7 +648,7 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                         putStrLn "tu peux pas déplacer de pieces, cest un tab vide"
                         lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
             else do 
-                putStrLn "ook ca devient interressant"
+                putStrLn "ook ca devient interressant, tab non vide"
                 
                 
                 if estCasDrop [x2,y2]
@@ -638,21 +658,78 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                         let bonOrdre = piecePrisDansBonOrdre joueur tt (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1))
                         print tt 
                         print decHum
+                        print deckOrd1
+                        print bonOrdre
                         if bonOrdre == "oui"
                             then do
-
-                                let joueurAdversePossedAlign3 = existence1Align3 [1,1,2,2,3,3] []
+                                
+                                ----determiner pieces de adversaire
+                                ----determiner dabord qui est joueur actuel pour deduire qui est adversaire
+                                
+                                let (ListeCoord listePosPiecHumain listePosPiecOrd1) = creerListeCoordPieces jeu [] [] 0 0
+                                --string humain ou joueur
+                                let joueurActuel = determinerJoueurActuel joueur 
+                                
+                                let adversaire = voiciLeJoueurAdverse joueur
+                                
+                                print adversaire
+                                print listePosPiecOrd1
+                                print listePosPiecHumain 
+                                
+                                
+                                let listePosPieceAdversaire = retourneListePieceAdversaire adversaire listePosPiecHumain listePosPiecOrd1
+                                
+                                let joueurAdversePossedAlign3 = existence1Align3 listePosPieceAdversaire []
+                                putStrLn "tu viens ici"
+                                print listePosPieceAdversaire
+                                print joueurAdversePossedAlign3
+                                putStrLn "hohoho"
                                 if joueurAdversePossedAlign3 == "non"
                                     then do
                                         
-                                        --place sur une case vide (le tab est vide so pas besoin de verifier si case quil veut jouer est vide) 
-    
-                                        let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
-                                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
-                                        print pieceAJouer2
-                                        printList2DDictio newListe2DDictio
-                                        print jeuUpdate
-                                        lancerPartie joueurSuivant tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
+        -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                        let pieceACettePosition = retourePieceAUnePosition jeu y1 x1
+                                        --cas drop case vide
+                                        if estUneCaseVide pieceACettePosition
+                                            then do
+                                                --let pieceACetteTaille = trace ("aaaaaa" ++ tt ++ message) $ retournePieceCorrespondante joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
+                                                
+                                                let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
+                                                let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
+                
+                                                printList2DDictio newListe2DDictio
+                                                --putStrLn "ici taffiches hein"
+                                                
+                                                print jeuUpdate
+                                                --print listeMU
+                                                --regler plus tard le cas ou une des listes est vide
+                                                
+                                                lancerPartie joueurSuivant tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
+                                                    
+                                        else do
+                                        
+                                            putStrLn "to bad case non vide, faut gober"
+                                            --est une piece gobable?
+                                            
+                                            --recuere piece a cette taille tt 
+                                            --je fais juste recuperer la piec de tt qui sera pieceACetteTaille
+                                            let pieceACetteTaille = retournePieceCorrespondante joueur tt
+                                            let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
+                                    
+                                            if messageN == "non gobable"
+                                                then do
+                                                    print messageN
+                                                    putStrLn "tu ne peux pas gober cette piece, recommence"
+                                                    lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
+                                                
+                                            else do 
+                                                let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
+                                                let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D 
+                                                printList2DDictio newListe2DDictio
+                                                print jeuNew
+                                                
+                                                lancerPartie joueurSuivant tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
+        -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                                         
                                     
                                 else do 
@@ -662,81 +739,37 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                                     --sinon redemande en disant joueur actuel doit jouer sur case jr adverse
                                     
                                     
-                                    let (ListeCoord listePosPiecHumain listePosPiecOrd1) = creerListeCoordPieces jeu [] [] 0 0
-                                    let joueurActuel = determinerJoueurActuel joueur 
-                                    let adversaire = voiciLeJoueurAdverse joueur
                                     
                                     --est-ce que joueurActuel va jouer sur une case du joueur adverse
                                     
                                     --remplacer ce if else par ma fonction peutFaireSonCoup joueur
+                                    let reponse = peutFaireSonCoup joueurActuel [x1,y1] listePosPiecHumain listePosPiecOrd1
                                     --------------------------------------------------------------------
-                                    if joueurActuel == "Humain"
-                                        then do 
-                                            if vaJouerSurUneCaseAdverse [x1,y1] listePosPiecOrd1
-                                                then putStrLn "oui il va jouer sur une case de adversaire"
-                                            else putStrLn "nooo il va foirer"
-                                    else do 
-                                        if vaJouerSurUneCaseAdverse [x1,y1] listePosPiecHumain
-                                            then do 
-                                                putStrLn "oui il va jouer sur une case de adversaire"
-                                        else do 
-                                            putStrLn "non il va foirer"
-                                    -----------------------------------------------------------------------
-                            
-                            
-                            
-                            
------------------ ----------------------------------------------------------------------------------
-                                let pieceACettePosition = retourePieceAUnePosition jeu y1 x1
-                                --cas drop case vide
-                                if estUneCaseVide pieceACettePosition
-                                    then do
-                                        print tt 
-                                        
-                                        --let pieceACetteTaille = trace ("aaaaaa" ++ tt ++ message) $ retournePieceCorrespondante joueur tt (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        
-                                        let (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) = drop1 joueur jeu y1 x1 (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
-                                --(ListesDispo message1 listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer2 liste2D
-                                        --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                            --let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceAJouer liste2DAvecDictionnaire
-                                        
-                                        --print pieceAJouer2
-                                        printList2DDictio newListe2DDictio
-                                        --putStrLn "ici taffiches hein"
-                                        
-                                        print jeuUpdate
-                                        --print listeMU
-                                        --regler plus tard le cas ou une des listes est vide
-                                        
-                                        lancerPartie joueurSuivant tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain newdecHum) (Deck Ordi1 newDeckOrd1)) pieceAJouer2) newListe2DDictio
-                                            
-                                else do
-                                
-                                    putStrLn "to bad case non vide, faut gober"
-                                    --est une piece gobable?
                                     
-                                    --recuere piece a cette taille tt 
-                                    --je fais juste recuperer la piec de tt qui sera pieceACetteTaille
-                                    let pieceACetteTaille = retournePieceCorrespondante joueur tt
-                                    let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
-                            
-                                    if messageN == "non gobable"
-                                        then do
-                                            print messageN
-                                            putStrLn "tu ne peux pas gober cette piece, recommence"
+                                    if reponse == "noon"
+                                        then do 
+                                            putStrLn "tu dois obligatoirement jouer sur une case de l'adversaire, car il a un align de 3, on recommence"
                                             lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
-                                        
                                     else do 
-                                        let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
-                                        let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D 
-                                        
-                                        --let (ListesDispo message1 liste1 liste2 liste3 liste4 liste5 liste6 liste7 liste8) = modifierListeDispo joueur tt newListe (ListesDispo "" listeBU listeMU listeSU listeTU listeBO listeMO listeSO listeTO)
-                                        printList2DDictio newListe2DDictio
-                                        print jeuNew
-                                        
-                                        lancerPartie joueurSuivant tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
-  ---------------------------------------------------------------------------------------------------
+                                        ---je peux jouer, alors je vais devoir gober la piece du joueur adverse 
+                                        ---ici je sais deja que la case de cette piece est occupée donc as besoin de vérifier si la case est vide ou non
+                                        let pieceACetteTaille = retournePieceCorrespondante joueur tt
+                                        let (InfosJeu messageN jeuUpdate listeCoordJr11 listeCoordJr22 updatedList x y i) = goberUnePiece tt pieceACetteTaille jeu liste2D [] [] x1 y1 x1 y1 0
+                                
+                                        if messageN == "non gobable"
+                                            then do
+                                                print messageN
+                                                putStrLn "tu ne peux pas gober cette piece, recommence"
+                                                lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
+                                            
+                                        else do 
+                                            let (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) = drop1 joueur jeuUpdate y1 x1 (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1)
+                                            let newListe2DDictio = addToDictionaryIn2DList x1 y1 tt pieceACetteTaille liste2D 
+                                            printList2DDictio newListe2DDictio
+                                            print jeuNew
+                                            
+                                            lancerPartie joueurSuivant tour (ListeModifie jeuNew (ListesDispo (Deck Humain deckHum1) (Deck Ordi1 deckOrd1)) pieceAJouer2) newListe2DDictio
+
                         else do 
                             putStrLn "l'ordre des pieces n'est pas respecté, recommence"
                             lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
@@ -801,12 +834,7 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
                                     printList2DDictio liste2DUpdate
                                     lancerPartie joueurSuivant tour (ListeModifie jeuUpdate (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2DUpdate
                                   Nothing -> putStrLn "chaud"
-                            
-                            
-                            
-
-
-
+                                  
     else do 
         putStrLn "cest chaud faut recommencer"
         lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D
@@ -883,12 +911,15 @@ main = do
             
             
             --let test2 = [0,0,4,4,1,1,1,2,1,3,7,7,2,2,0,1,0,2]
-            --let goo = compteAvecListeComplete test2 test2 []
+            let goo = compteAvecListeComplete [1,1] [1,1] []
             
-            --print goo
+            print goo
             
             let hehe = vaJouerSurUneCaseAdverse [1,1] [0,1,1,2,3,3]
             print hehe
+            
+            let res = existence1Align3 [] []
+            print res 
             
             
             let initialListeModifie = ListeModifie jeu (ListesDispo (Deck Humain deckHumain) (Deck Ordi1 deckOrdi1)) ""
