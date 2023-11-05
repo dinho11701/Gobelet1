@@ -363,4 +363,3 @@ recupererCleTeteDictio row col myList
       (key, _):_ -> Just key
       _          -> Nothing
       
-
