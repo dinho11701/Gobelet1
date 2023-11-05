@@ -553,7 +553,7 @@ faireSonMeilleurCoup joueur jeu deckOrd1 (InfosMeilleurCoup i j score)
                 let jeu1 = modifierCase2D jeu (head deckOrd1) 0 0
                     (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu1 [] [] 0 0
                     nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
-                    nbALign2 = 
+                    --nbALign2 = 
                 in InfosMeilleurCoup 0 0 nbALign3
         else InfosMeilleurCoup (-1) (-1) (-1)
     | otherwise = InfosMeilleurCoup (-1) (-1) (-1)
@@ -963,6 +963,10 @@ main = do
 
         else do
             putStrLn "as vide"
+            
+            let nb2 = calculerAlignement2 [0,0,2,0,0,1,1,1,1,3,3,3]
+            print nb2
+            
             
             let f = sum (compteAvecListeComplete [0,0,1,0,2,0] [0,0,1,0,2,0] [])
             print f 
