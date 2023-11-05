@@ -43,6 +43,12 @@ quiAGagne Humain = "Vous avez gagné YEES"
 quiAGagne Ordi1 = "DOMMAGE VOUS AVEZ PERDU"
 
 
+quiJoueNow :: Player -> String
+quiJoueNow Humain = "Moi"
+quiJoueNow Ordi1 = "Ordi1"
+
+
+
 
 afficheJeuQuandOrdiFinit :: Player -> [[String]] -> IO()
 afficheJeuQuandOrdiFinit Ordi1 jeu = print jeu
