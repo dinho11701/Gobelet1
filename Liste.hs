@@ -73,6 +73,17 @@ estUneLigneDe4Diag x1 y1 x4 y4 = x4 - x1 == 3 && y4 - y1 == 3
 
 
 
+calculerAlignement2 :: [Int] -> Int
+calculerAlignement2 [] = 0
+calculerAlignement2 [_] = 0
+calculerAlignement2 [_, _] = 0
+calculerAlignement2 [_, _, _] = 0
+calculerAlignement2 (x1 : y1 : x2 : y2 : xs) =
+  if estUneLigne x1 y1 x2 y2
+    then 1 + calculerAlignement2 (x1 : y1 : xs)
+  else calculerAlignement2 (x1 : y1 : xs)
+
+
 supprimerElementALaPosition :: Int -> [a] -> [a]
 supprimerElementALaPosition _ [] = []
 supprimerElementALaPosition 0 (_:xs) = xs
