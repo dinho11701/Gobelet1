@@ -199,8 +199,7 @@ verifieJaiPasPerdu jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i
 
 verifieJaiPasPerdu :: InfosJeu -> InfosJeu 
 verifieJaiPasPerdu (InfosJeu message jeu listeCoordJr1 listeCoordJr2 liste2DAvecDictionnaire x y i) = do
-    
-    
+
     --let caseValue = recupereValeurTeteDictio x y liste2DAvecDictionnaire
     
     let cle = recupererCleTeteDictio x y liste2DAvecDictionnaire
@@ -542,21 +541,98 @@ existence1Align3 listePosPieceJr listeNbALign3 = do
                     if estUneCaseVide piecePositionDepart--}
 
 
-
+{--
 faireSonMeilleurCoup :: Player -> [[String]] -> [String] -> InfosMeilleurCoup -> InfosMeilleurCoup
-faireSonMeilleurCoup joueur jeu deckOrd1 (InfosMeilleurCoup i j score)
+faireSonMeilleurCoup joueur jeu1 deckOrd1 (InfosMeilleurCoup j i scoreDepart) = do 
+    if i < length jeu1 
+        then do
+            if j < length jeu1
+                then do 
+                    faireSonMeilleurCoupPourUnPoint joueur jeu1 deckOrd1 (InfosMeilleurCoup j i scoreDepart)
+                    faireSonMeilleurCoup joueur jeu1 deckOrd1 (InfosMeilleurCoup (j + 1) i scoreDepart)
+            else faireSonMeilleurCoupPourUnPoint joueur jeu1 deckOrd1 (InfosMeilleurCoup 0 (i + 1) scoreDepart)
+    else (InfosMeilleurCoup j i scoreDepart)
+
+
+faireSonMeilleurCoupPourUnPoint :: Player -> [[String]] -> [String] -> InfosMeilleurCoup -> InfosMeilleurCoup
+faireSonMeilleurCoupPourUnPoint joueur jeu1 deckOrd1 (InfosMeilleurCoup j i scoreDepart)
     | joueur == Ordi1 =
-        let casee = retourePieceAUnePosition jeu 0 0
+        let casee = retourePieceAUnePosition jeu j i
         in
         if estUneCaseVide casee
             then
-                let jeu1 = modifierCase2D jeu (head deckOrd1) 0 0
+                let jeu2 = modifierCase2D jeu1 (head deckOrd1) 0 0
                     (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu1 [] [] 0 0
                     nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
-                    --nbALign2 = 
-                in InfosMeilleurCoup 0 0 nbALign3
-        else InfosMeilleurCoup (-1) (-1) (-1)
+                    nbALign2 = calculerAlignement2 listePosPiecOrd1
+                    score = nbALign2 + nbALign3
+                | score > scoreDepart = InfosMeilleurCoup j i  score
+                | otherwise = InfosMeilleurCoup j i scoreDepart
+        else do 
+            let taillePieceWantPlay = recupereTailleCorrespondante (head deckOrd1)
+            let taillePieceDsJeu = recupereTailleCorrespondante casee
+            if estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu
+                then do 
+                    let jeu2 = modifierCase2D jeu (head deckOrd1) 0 0
+                    (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu2 [] [] 0 0
+                    nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
+                    nbALign2 = calculerAlignement2 listePosPiecOrd1
+                    score = nbALign2 + nbALign3
+                | score > scoreDepart = InfosMeilleurCoup j i score
+                | otherwise = InfosMeilleurCoup j i scoreDepart
+            else InfosMeilleurCoup j i score
+            
     | otherwise = InfosMeilleurCoup (-1) (-1) (-1)
+--}
+
+
+
+
+faireSonMeilleurCoup :: Player -> [[String]] -> Int -> Int -> [String] -> InfosMeilleurCoup -> InfosMeilleurCoup
+faireSonMeilleurCoup joueur jeu1 j i deckOrd1 (InfosMeilleurCoup x y scoreDepart)
+    | i < length jeu1 = -- Vérification de la limite en i
+        if j < length jeu1
+            then do 
+                let (InfosMeilleurCoup x y score) = faireSonMeilleurCoupPourUnPoint joueur jeu1 j i deckOrd1 (InfosMeilleurCoup x y scoreDepart)
+                faireSonMeilleurCoup joueur jeu1 (j + 1) i deckOrd1 (InfosMeilleurCoup x y score) 
+            else
+                faireSonMeilleurCoup joueur jeu1 0 (i + 1) deckOrd1 (InfosMeilleurCoup x y scoreDepart)
+    | otherwise = InfosMeilleurCoup x y scoreDepart
+
+faireSonMeilleurCoupPourUnPoint :: Player -> [[String]] -> Int -> Int -> [String] -> InfosMeilleurCoup -> InfosMeilleurCoup
+faireSonMeilleurCoupPourUnPoint joueur jeu1 j i deckOrd1 (InfosMeilleurCoup x y scoreDepart)
+    | joueur == Ordi1 =
+        let casee = retourePieceAUnePosition jeu1 j i -- Utilisation de i et j dans l'ordre (i j)
+        in
+        if estUneCaseVide casee
+            then
+                let jeu2 = modifierCase2D jeu1 (head deckOrd1) i j -- Utilisation de i et j dans l'ordre (i j)
+                    (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu2 [] [] 0 0
+                    nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
+                    nbALign2 = calculerAlignement2 listePosPiecOrd1
+                    score = nbALign2 + nbALign3
+                in
+                if score > scoreDepart
+                    then InfosMeilleurCoup j i score
+                    else InfosMeilleurCoup j i scoreDepart
+        else
+            let taillePieceWantPlay = recupereTailleCorrespondante (head deckOrd1)
+                taillePieceDsJeu = recupereTailleCorrespondante casee
+            in
+            if estUnePieceTailleInf taillePieceWantPlay taillePieceDsJeu
+                then
+                    let jeu2 = modifierCase2D jeu1 (head deckOrd1) i j -- Utilisation de i et j dans l'ordre (i j)
+                        (ListeCoord liste1 listePosPiecOrd1) = creerListeCoordPieces jeu2 [] [] 0 0
+                        nbALign3 = sum (compteAvecListeComplete listePosPiecOrd1 listePosPiecOrd1 [])
+                        nbALign2 = calculerAlignement2 listePosPiecOrd1
+                        score = nbALign2 + nbALign3
+                    in
+                    if score > scoreDepart
+                        then InfosMeilleurCoup j i score
+                        else InfosMeilleurCoup j i scoreDepart
+            else InfosMeilleurCoup j i scoreDepart
+    | otherwise = InfosMeilleurCoup (-1) (-1) (-1)
+
 
 
             
@@ -950,7 +1026,7 @@ main = do
             print res 
             --faireSonMeilleurCoup joueur jeu deckOrd1 (InfosMeilleurCoup i j)
             
-            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoup Humain jeu deckOrdi1 (InfosMeilleurCoup 0 0 0) 
+            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoupPourUnPoint Humain jeu 0 0 deckOrdi1 (InfosMeilleurCoup 0 0 0) 
             print score
             
             
@@ -965,14 +1041,16 @@ main = do
             putStrLn "as vide"
             
             let nb2 = calculerAlignement2 [0,0,2,0,0,1,1,1,1,3,3,3]
-            print nb2
+            --print nb2
             
             
             let f = sum (compteAvecListeComplete [0,0,1,0,2,0] [0,0,1,0,2,0] [])
-            print f 
+            --print f 
             
-            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoup Ordi1 jeu deckOrdi1 (InfosMeilleurCoup 0 0 0) 
-            print score
+            let (InfosMeilleurCoup x y score)  = faireSonMeilleurCoup Ordi1 jeu 0 0 deckOrdi1 (InfosMeilleurCoup 0 0 0)
+            --print score
+            print x 
+            print y
             
             
             let go = liste2DAvecDictionnaire
