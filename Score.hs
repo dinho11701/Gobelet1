@@ -1,3 +1,16 @@
+{- |
+Module      :  Score
+Description :  Calcule le score d'un State
+Copyright   :  Oswald Essongué
+License     :  <license>
+
+Maintainer  :  cd891906@ens.uqam.ca
+Stability   :  stable 
+Portability :  portable 
+
+-}
+
+
 module Score (score) where
 
 import State (State)
