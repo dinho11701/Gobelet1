@@ -1,26 +1,45 @@
+{- |
+Module      :  Liste
+Description :  Rassemble des opérations de listes et listes de dictionnaire
+Copyright   :  Oswald Essongué
+License     :  <license>
+
+Maintainer  :  cd891906@ens.uqam.ca
+Stability   :  stable 
+Portability :  portable 
+
+-}
+
+
 module Liste where
 
 import qualified Data.Map as Map
 
-
+-- Type représentant une liste de coordonnées pour X et O
 data ListeCoord = ListeCoord [Int] [Int]
 
--- Création d'un dictionnaire
+-- Création d'un dictionnaire avec une clé et sa valeur
 type DictionnairePiece = [(String, String)]
 
+-- | Cette fonction vérifie si une ligne est complète dans une grille de jeu 2D 
+-- | en utilisant les coordonnées de deux cases (x1, y1) et (x2, y2)
 estUneLigneComplete :: Int -> Int -> Int -> Int -> Bool
 estUneLigneComplete x1 y1 x2 y2 = estUneLigneCompleteDiag x1 y1 x2 y2 || estUneLigneCompleteDroite x1 y1 x2 y2
     || estUneLigneCompleteBas x1 y1 x2 y2
     
+-- | Vérifie si une ligne est complète en diagonale.
 estUneLigneCompleteDiag :: Int -> Int -> Int -> Int -> Bool
 estUneLigneCompleteDiag x1 y1 x2 y2 = x2 - x1 == 2 && y2 - y1 == 2
 
+-- |  Vérifie si une ligne est complète horizontalement
 estUneLigneCompleteDroite :: Int -> Int -> Int -> Int -> Bool
 estUneLigneCompleteDroite x1 y1 x2 y2 = x2 - x1 == 2 && y2 - y1 == 0
 
+-- | Vérifie si une ligne est complète verticale
 estUneLigneCompleteBas :: Int -> Int -> Int -> Int -> Bool
 estUneLigneCompleteBas x1 y1 x2 y2 = x2 - x1 == 0 && y2 - y1 == 2
 
+-- | Vérifie si une ligne est formée
 estUneLigne :: Int -> Int -> Int -> Int -> Bool
 estUneLigne x1 y1 x2 y2 =
   (estUneLigneXDroite x1 x2 && estUneLigneYDroite y1 y2)
@@ -29,6 +48,7 @@ estUneLigne x1 y1 x2 y2 =
     && (estUneLigneXBas x1 x2 && estUneLigneYBas y1 y2)
     && (estUneLigneDiagonale x1 x2 y1 y2) 
 
+-- | Supprime un élément d'une liste
 supprimerElement :: Eq a => a -> [a] -> [a]
 supprimerElement _ [] = []  -- Si la liste est vide, il n'y a rien à supprimer
 supprimerElement element (x:xs)
@@ -51,10 +71,11 @@ estUneLigneYBas y1 y2 = y1 + 1 == y2
 estUneLigneDiagonale :: Int -> Int -> Int -> Int -> Bool
 estUneLigneDiagonale x1 x2 y1 y2 = x1 + 1 == x2 && y1 + 1 == y2
 
+-- | Ajoute un élément au debut d'une liste
 ajouteValeurInListe :: [Int] -> Int -> [Int]
 ajouteValeurInListe liste nb = nb : liste
 
-
+-- | Ajoute un élément a la fin d'une liste
 ajouteElementALaFin :: [Int] -> Int -> [Int]
 ajouteElementALaFin liste nb = liste ++ [nb]
 
@@ -72,7 +93,7 @@ estUneLigneDe4Diag :: Int -> Int -> Int -> Int -> Bool
 estUneLigneDe4Diag x1 y1 x4 y4 = x4 - x1 == 3 && y4 - y1 == 3
 
 
-
+-- | Calcule le nombre d'alignement de 2 
 calculerAlignement2 :: [Int] -> Int
 calculerAlignement2 [] = 0
 calculerAlignement2 [_] = 0
@@ -83,7 +104,7 @@ calculerAlignement2 (x1 : y1 : x2 : y2 : xs) =
     then 1 + calculerAlignement2 (x1 : y1 : xs)
   else calculerAlignement2 (x1 : y1 : xs)
 
-
+-- | Supprime un element a une position
 supprimerElementALaPosition :: Int -> [a] -> [a]
 supprimerElementALaPosition _ [] = []
 supprimerElementALaPosition 0 (_:xs) = xs
@@ -92,6 +113,7 @@ supprimerElementALaPosition n (x:xs)
     | otherwise = x : supprimerElementALaPosition (n - 1) xs
 
 
+-- | Cherche s'il y a un alignement de 4 pieces 
 existeAlign4 :: [Int] -> [Int] -> [Int]
 existeAlign4 x1y1 listeComplete  = do
 
@@ -107,7 +129,7 @@ existeAlign4 x1y1 listeComplete  = do
 
 
 
---renvoie la nouvelle liste complete 
+-- | Renvoie la nouvelle liste complete 
 enleverElementsInutiles :: [Int] -> [Int] -> Int -> Int -> [Int]
 enleverElementsInutiles listePosXY listeComplete i decalage = do
 
@@ -120,7 +142,7 @@ enleverElementsInutiles listePosXY listeComplete i decalage = do
     else listeComplete
     
     
-
+-- | Crée les listes de coordonnées des 2 joueurs
 creerListeCoordPieces :: [[String]] -> [Int] -> [Int] -> Int -> Int -> ListeCoord
 creerListeCoordPieces jeu pieceJr pieceCom i j = do
     if i < length jeu
@@ -146,7 +168,7 @@ creerListeCoordPieces jeu pieceJr pieceCom i j = do
           
                     
 
---retourne position xy des 4 pieces
+-- | Retourne la position xy des 4 pieces formant un alignement de 4
 chercherAlignement4Pieces :: [Int] -> [Int] -> [Int] -> [Int] -> Int -> [Int]
 chercherAlignement4Pieces listexy listeComplete listeAlign4 listePosXY i = do
     let x1 = listexy !! 0
@@ -197,7 +219,7 @@ chercherAlignement4Pieces listexy listeComplete listeAlign4 listePosXY i = do
     else listePosXY
 
 
-
+-- | Cree une liste de cases vides
 donneListCasesVide :: [[String]] -> [Int] -> Int -> Int -> [Int]
 donneListCasesVide jeu listePosCasesVides i j = do 
     if i < length jeu 
@@ -215,11 +237,12 @@ donneListCasesVide jeu listePosCasesVides i j = do
     else listePosCasesVides
 
 
+-- | Détermine si une case est vide
 estUneCaseVide :: String -> Bool
 estUneCaseVide casee = casee == "__"
 
 
-
+-- | Crée des triplets formant une ligne de 3 
 creerTriplet :: [Int] -> [Int] -> Int -> [Int]
 creerTriplet couple listeComplete i = do
     let x1 = couple !! 0
@@ -238,7 +261,7 @@ creerTriplet couple listeComplete i = do
     else couple
 
 
-
+-- | Retourne le 2e point formant une ligne avec x1y1
 retourneSonX2Y2 :: [Int] -> [Int] -> Int -> [Int]
 retourneSonX2Y2 x1y1 listeNouvelle i = do
     if length listeNouvelle == 2
@@ -255,6 +278,7 @@ retourneSonX2Y2 x1y1 listeNouvelle i = do
     else []
 
 
+-- | Compte le nombre d'alignement 3 pour chaque point
 compteAvecListeComplete :: [Int] -> [Int] -> [Int] -> [Int]
 compteAvecListeComplete [] _ listeCompteur = listeCompteur
 compteAvecListeComplete _ [] listeCompteur = listeCompteur
@@ -262,7 +286,7 @@ compteAvecListeComplete (x1:y1:rest) listeComplete listeCompteur =
     let new = comptePourChacunFinal [x1, y1] listeComplete listeCompteur
     in compteAvecListeComplete rest listeComplete new
 
-
+-- | Compte le nombre d'alignement 3 pour un point
 comptePourChacunFinal :: [Int] -> [Int] -> [Int] -> [Int]
 comptePourChacunFinal listexy listeComplete listeCompteur = do
     let x1 = listexy !! 0
@@ -281,19 +305,27 @@ comptePourChacunFinal listexy listeComplete listeCompteur = do
             then ajouteValeurInListe listeCompteur 1
         else ajouteValeurInListe listeCompteur 0 
 
+-- | Affiche le jeu 2D 
+displayBoard :: [[String]] -> String
+displayBoard tab = unlines $ map (unwords . map formatCell) tab
 
--- Exemple d'une liste 2D de 4x4 cases avec des dictionnaires vides
+-- | Détermine le format de la cellule
+formatCell :: String -> String
+formatCell casee = if casee == " " then "__" else casee
+
+
+-- | Fais une liste 2D de 4x4 cases avec des dictionnaires vides
 liste2DAvecDictionnaire :: [[DictionnairePiece]]
 liste2DAvecDictionnaire = createListVide2D 4 4
 
 
-
+-- | Cree une liste 2D de dictionnaire avec des dictionnaires vides
 createListVide2D :: Int -> Int -> [[DictionnairePiece]]
 createListVide2D ligne col =
   replicate ligne (replicate col [])
 
 
---- Fonction pour ajouter une clé et une valeur au début d'un dictionnaire dans une case 2D
+--- | Fonction pour ajouter une clé et une valeur au début d'un dictionnaire dans une case 2D
 addToDictionaryIn2DList :: Int -> Int -> String -> String -> [[DictionnairePiece]] -> [[DictionnairePiece]]
 addToDictionaryIn2DList row col key value myList =
     let prependKeyValue dictList = (key, value) : dictList
@@ -301,7 +333,7 @@ addToDictionaryIn2DList row col key value myList =
     in updatedRow
   
   
- 
+-- | Affiche une liste 2D de dictionnaires vides
 printList2DDictio :: [[DictionnairePiece]] -> IO ()
 printList2DDictio myList =
     mapM_ printRowWithLabel (zip [0..] myList)
@@ -317,7 +349,7 @@ printList2DDictio myList =
         
         printKeyValue (key, value) = putStrLn $ "    " ++ key ++ ": " ++ value
 
--- Fonction pour déterminer la taille d'un dictionnaire dans une case 2D
+-- | Fonction pour déterminer la taille d'un dictionnaire dans une case 2D
 dictionarySizeIn2DList :: Int -> Int -> [[DictionnairePiece]] -> Maybe Int
 dictionarySizeIn2DList row col myList =
   if row >= 0 && col >= 0 && row < length myList && col < length (myList !! row)
@@ -325,7 +357,7 @@ dictionarySizeIn2DList row col myList =
     else Nothing
 
 
--- Comparer la taille du dictionnaire dans une case spécifique à une valeur donnée
+-- | Comparer la taille du dictionnaire dans une case spécifique à une valeur donnée
 tailleDictionnaire :: Int -> Int -> [[DictionnairePiece]] -> Int -> Bool
 tailleDictionnaire row col myList taille1 =
   case dictionarySizeIn2DList row col myList of
@@ -335,8 +367,8 @@ tailleDictionnaire row col myList taille1 =
 
 
 
--- Fonction pour retirer une clé-valeur à une certaine position d'un dictionnaire
--- et renvoyer cette clé-valeur ainsi que le dictionnaire modifié
+-- | Fonction pour retirer une clé-valeur à une certaine position d'un dictionnaire
+-- | et renvoyer cette clé-valeur ainsi que le dictionnaire modifié
 removeKeyValueAtPosition :: Int -> Int -> String -> [[DictionnairePiece]] -> Maybe ((String, String), [[DictionnairePiece]])
 removeKeyValueAtPosition row col key myList
   | row < 0 || col < 0 || row >= length myList || col >= length (myList !! row) = Nothing
@@ -347,7 +379,7 @@ removeKeyValueAtPosition row col key myList
     in Just (removedPair, updatedRow)
     
 
--- Fonction pour retirer une paire (clé, valeur) d'une liste de paires par clé
+-- | Fonction pour retirer une paire (clé, valeur) d'une liste de paires par clé
 removePairByKey :: String -> DictionnairePiece -> ((String, String), DictionnairePiece)
 removePairByKey key dictList =
     case span (\(k, _) -> k /= key) dictList of
@@ -355,7 +387,7 @@ removePairByKey key dictList =
     _ -> ((key, ""), dictList)  -- Clé non trouvée
 
 
--- Fonction pour récupérer la valeur du premier élément du dictionnaire dans une case 2D
+-- | Fonction pour récupérer la valeur du premier élément du dictionnaire dans une case 2D
 recupereValeurTeteDictio :: Int -> Int -> [[DictionnairePiece]] -> Maybe String
 recupereValeurTeteDictio row col myList
   | row < 0 || col < 0 || row >= length myList || col >= length (myList !! row) = Nothing
@@ -365,7 +397,7 @@ recupereValeurTeteDictio row col myList
       _              -> Nothing
       
 
--- Fonction pour récupérer la clé du premier élément du dictionnaire dans une case 2D
+-- | Fonction pour récupérer la clé du premier élément du dictionnaire dans une case 2D
 recupererCleTeteDictio :: Int -> Int -> [[DictionnairePiece]] -> Maybe String
 recupererCleTeteDictio row col myList
   | row < 0 || col < 0 || row >= length myList || col >= length (myList !! row) = Nothing
@@ -373,4 +405,13 @@ recupererCleTeteDictio row col myList
     case myList !! row !! col of
       (key, _):_ -> Just key
       _          -> Nothing
+      
+
+-- Fonction modifiant une case du tableau 2D
+modifierCase2D :: [[a]] -> a -> Int -> Int -> [[a]]
+modifierCase2D tableau nouvelleValeur ligne colonne
+  | ligne < 0 || ligne >= length tableau || colonne < 0 || colonne >= length (tableau !! 0) = tableau
+  | otherwise =
+    let (avant, apres) = splitAt colonne (tableau !! ligne)
+    in take ligne tableau ++ [avant ++ [nouvelleValeur] ++ tail apres] ++ drop (ligne + 1) tableau
       
