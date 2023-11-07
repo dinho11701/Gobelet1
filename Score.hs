@@ -1,59 +1,27 @@
-module Score where
-import Liste 
+module Score (score) where
 
+import State (State)
+import Data.List (transpose, group)
 
-creerListPieces2JoueursAvecDictio :: [[String]] -> Int -> Int -> [Int] -> [Int] -> [[DictionnairePiece]] ->ListeCoord
-creerListPieces2JoueursAvecDictio jeu1 i j pieceJr pieceCom dictio2D = do 
-    if i < length jeu1 
-        then do -- Vérification de la limite en i
-            if j < length jeu1
-                then do 
-                    let piece = recupererCleTeteDictio i j dictio2D
-                    case piece of
-                        Just piece -> do
-                            if piece == "X3" || piece == "X2" || piece == "X1" || piece == "X0"
-                                then do 
-                                    let newPieceHum = ajouteElementALaFin pieceJr j
-                                        newUpdateHum = ajouteElementALaFin newPieceHum i
-                                    creerListPieces2JoueursAvecDictio jeu1 i (j + 1) newUpdateHum pieceCom dictio2D
-                            else if piece `elem` ["O3","O2","O1","O0"]
-                                then do 
-                                    let newPieceCom = ajouteElementALaFin pieceCom j
-                                        newUpdateCom = ajouteElementALaFin newPieceCom i
-                                    creerListPieces2JoueursAvecDictio jeu1 i (j + 1) pieceJr newUpdateCom dictio2D
-                            else creerListPieces2JoueursAvecDictio jeu1 i (j + 1) pieceJr pieceCom dictio2D
-                        Nothing -> creerListPieces2JoueursAvecDictio jeu1 i (j + 1) pieceJr pieceCom dictio2D
-            else creerListPieces2JoueursAvecDictio jeu1 (i + 1) 0 pieceJr pieceCom dictio2D
-                
-    else ListeCoord pieceJr pieceCom
-    
-    
-    
-creerListPieces2JoueursAvecDictioPrint :: [[String]] -> Int -> Int -> [Int] -> [Int] -> [[DictionnairePiece]] -> IO ()
-creerListPieces2JoueursAvecDictioPrint jeu1 i j pieceJr pieceCom dictio2D = do 
-    if i < length jeu1 
-        then do -- Vérification de la limite en i
-            if j < length jeu1
-                then do 
-                    let piece = recupererCleTeteDictio i j dictio2D
-                    case piece of
-                        Just piece -> do
-                            print piece
-                            if piece == "X3" || piece == "X2" || piece == "X1" || piece == "X0"
-                                then do 
-                                    let newPieceHum = ajouteElementALaFin pieceJr j
-                                        newUpdateHum = ajouteElementALaFin newPieceHum i
-                                    creerListPieces2JoueursAvecDictioPrint jeu1 i (j + 1) newUpdateHum pieceCom dictio2D
-                            else if piece `elem` ["O3","O2","O1","O0"]
-                                then do 
-                                    let newPieceCom = ajouteElementALaFin pieceCom j
-                                        newUpdateCom = ajouteElementALaFin newPieceCom i
-                                    creerListPieces2JoueursAvecDictioPrint jeu1 i (j + 1) pieceJr newUpdateCom dictio2D
-                            else creerListPieces2JoueursAvecDictioPrint jeu1 i (j + 1) pieceJr pieceCom dictio2D
-                        Nothing -> creerListPieces2JoueursAvecDictioPrint jeu1 i (j + 1) pieceJr pieceCom dictio2D
-            else creerListPieces2JoueursAvecDictioPrint jeu1 (i + 1) 0 pieceJr pieceCom dictio2D
-                
-    else do 
-        print pieceJr
-        print pieceCom
-    
+-- | Calcule le score d'un état donné pour le jeu.
+score :: State -> Int
+score state = playerScore 'X' - playerScore 'O'
+  where
+    -- | Calcule le score d'un joueur dans un état donné en faisant la somme des scores pour chaque ligne et diagonale.
+    playerScore player = sum $ map (calculateScoreForLine player) (linesAndDiagonals state)
+
+    -- | Calcule le score d'un joueur pour une ligne donnée en comptant le nombre de séquences de 2 et 3 symboles consécutifs du joueur.
+    calculateScoreForLine player line =
+      let twoInARow = filter (\grp -> length grp == 2 && head grp == player) $ group line
+          threeInARow = filter (\grp -> length grp == 3 && head grp == player) $ group line
+      in length twoInARow + 10 * length threeInARow
+
+    -- | Génère une liste de lignes et de diagonales à partir de l'état du jeu.
+    linesAndDiagonals board = board ++ transpose board ++ diagonals board
+
+    -- | Génère les diagonales principales (de gauche à droite) à partir de l'état du jeu.
+    diagonals board = [primaryDiagonal board, primaryDiagonal (map reverse board)]
+
+    -- | Génère la diagonale principale d'une matrice.
+    primaryDiagonal [] = []
+    primaryDiagonal (row:rows) = head row : primaryDiagonal (map tail rows)
