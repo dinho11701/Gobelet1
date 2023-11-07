@@ -1,61 +1,67 @@
+
+{- |
+Module      :  Joueur
+Description :  Rassemble tout ce qui est relié a un joueur
+Copyright   :  Oswald Essongué
+License     :  <license>
+
+Maintainer  :  cd891906@ens.uqam.ca
+Stability   :  stable 
+Portability :  portable 
+
+-}
+
 module Joueur where
 import Debug.Trace
+import Liste 
 
---ca me eprmet de renvoyer 2 listes (le jeu,la listeCoorespondante modifie du joueur)
+-- 
 data ListeModifie = ListeModifie [[String]] ListesDispo String
 
-data Player = Humain | Ordi1 | Ordi2
+-- Type de donnée Player qui peut etre un Humain Ou Un Ordi1
+data Player = Humain | Ordi1 
     deriving (Eq, Show)
 
+-- Type de donnée Deck qui est composé d'un Player et sa liste de pieces
 data Deck = Deck Player [String]
     deriving (Show)
 
+-- Type de donnée Deck qui est composé des decks des 2 joueurs
 data ListesDispo = ListesDispo Deck Deck
     deriving (Show)
 
 
+-- Deck de départ d'un Humain
 deckHumain = ["X3", "X2", "X1", "X0","X3", "X2", "X1", "X0","X3", "X2", "X1", "X0"]
+
+-- Deck de départ d'un Ordi
 deckOrdi1 = ["O3", "O2", "O1", "O0","O3", "O2", "O1", "O0","O3", "O2", "O1", "O0"]
 
 
---type PiecesJoueur = [String] 
---type PiecesOrdi1 = [String]
---type PiecesJoueur2 = [String] 
---type PiecesOrdi2 = [String] 
-
-
---data Deck = Deck Player [String] deriving (Show)
-
-
+-- | Differentes tailles des pieces d'un joueur 
 diffTaillePiece = ["B", "M", "S", "T"]
 
---data ListesDispo = ListesDispo Deck Deck
 
-
--- Fonction pour alterner les joueurs
+-- | Fonction pour alterner les joueurs lors d'une partie
 alternerJoueurs :: Player -> Player
 alternerJoueurs Humain = Ordi1
 alternerJoueurs Ordi1 = Humain
 
 
+-- | Fonction pour etablir le joueur gagnant 
 quiAGagne :: Player -> String
-quiAGagne Humain = "Vous avez gagné YEES"
-quiAGagne Ordi1 = "DOMMAGE VOUS AVEZ PERDU"
+quiAGagne Humain = "Vous avez gagné cette partie FELICITATIONS!!"
+quiAGagne Ordi1 = "DOMMAGE l'ordinateur vous a battu"
 
 
+-- | Fonction pour déterminer le joueur qui joue actuelllemnt 
 quiJoueNow :: Player -> String
 quiJoueNow Humain = "Moi"
 quiJoueNow Ordi1 = "Ordi1"
 
 
-
-
-afficheJeuQuandOrdiFinit :: Player -> [[String]] -> IO()
-afficheJeuQuandOrdiFinit Ordi1 jeu = print jeu
-
-
-
  
+-- | Fonction pour jouer un coup drop dans le jeu a partir du deck du joueur correspondant
 drop1 :: Player -> [[String]] -> Int -> Int -> ListeModifie -> ListeModifie
 drop1 joueur jeu x y (ListeModifie jeu1 (ListesDispo (Deck Humain deckH) (Deck Ordi1 deckO1)) pieceAJouer1) =
   let (pieceAJouer2, nouveauDeckHumain, nouveauDeckOrdi1) = case joueur of
@@ -66,7 +72,7 @@ drop1 joueur jeu x y (ListeModifie jeu1 (ListesDispo (Deck Humain deckH) (Deck O
 
 
 
-
+-- | Fonction pour récupérer la taille correspondante d'une piece
 recupereTailleCorrespondante :: String -> String
 recupereTailleCorrespondante piece
     | piece == "X3" || piece == "O3" = "B"
@@ -76,7 +82,7 @@ recupereTailleCorrespondante piece
     | otherwise = "Taille inconnue"
 
 
-
+-- | Fonction pour vérifier si la piece que le joueur veut jouer est pris ds le bon ordre
 piecePrisDansBonOrdre :: Player -> String -> ListesDispo -> String
 piecePrisDansBonOrdre joueur taille (ListesDispo (Deck Humain deckH) (Deck Ordi1 deckO1))
   | joueur == Humain && taille `elem` diffTaillePiece && (head deckH) == retournePieceCorrespondante Humain taille = "oui"
@@ -84,6 +90,7 @@ piecePrisDansBonOrdre joueur taille (ListesDispo (Deck Humain deckH) (Deck Ordi1
   | otherwise = "non"
 
 
+-- | Fonction pour retourner la piece correspondant a la taille de celle-ci
 retournePieceCorrespondante :: Player -> String -> String
 retournePieceCorrespondante Humain "B" = "X3"
 retournePieceCorrespondante Humain "M" = "X2"
@@ -95,79 +102,8 @@ retournePieceCorrespondante Ordi1 "S" = "O1"
 retournePieceCorrespondante Ordi1 "T" = "O0"
 
 
+-- | Fonction pour afficher les decks des 2 joueurs
+afficher2Decks :: [String] -> [String] -> String
+afficher2Decks list1 list2 =
+  unwords list1 ++ " || " ++ unwords list2
 
-
-
-
-        
-
-
-
-
---meilleur version , plus clean
-modifierCase2D :: [[a]] -> a -> Int -> Int -> [[a]]
-modifierCase2D tableau nouvelleValeur ligne colonne
-  | ligne < 0 || ligne >= length tableau || colonne < 0 || colonne >= length (tableau !! 0) = tableau
-  | otherwise =
-    let (avant, apres) = splitAt colonne (tableau !! ligne)
-    in take ligne tableau ++ [avant ++ [nouvelleValeur] ++ tail apres] ++ drop (ligne + 1) tableau
-
-
--- Définition des listes
-
-
-listeUserBig = take 3 (repeat "X3")
-listeUserMedium = take 3 (repeat "X2")
-listeUserSmall = take 3 (repeat "X1")
-listeUserTiny = take 3 (repeat "X0")
-
-
-listeOrdiBig = take 3 (repeat "O3")
-listeOrdiMedium = take 3 (repeat "O2")
-listeOrdiSmall = take 3 (repeat "O1")
-listeOrdiTiny = take 3 (repeat "O0")
-
-
-
-listeBUser :: [String]
-listeBUser = ["X3", "X2", "X1", "X0"]
-
-listeMUser :: [String]
-listeMUser = ["X3", "X2", "X1", "X0"]
-
-listeSUser :: [String]
-listeSUser = ["X3", "X2", "X1", "X0"]
-
-
-listeTUser :: [String]
-listeTUser = ["X3", "X2", "X1", "X0"]
-
-
-listeBComp :: [String]
-listeBComp = ["03", "02", "01", "00"]
-
-listeMComp :: [String]
-listeMComp = ["03", "02", "01", "00"]
-
-listeSComp :: [String]
-listeSComp = ["03", "02", "01", "00"]
-
-listeTComp :: [String]
-listeTComp = ["03", "02", "01", "00"]
-
-formaterListeMov :: [[String]] -> String
-formaterListeMov listes =
-    let formatLigne ligne = unwords ligne
-        formatListe liste = unwords liste
-    in unwords [formatListe liste | liste <- listes]
-
-
---fonction qui va recuperer reste de la liste
-prendResteListe :: [String] -> [String]
-prendResteListe [] = []
-prendResteListe(_:xs) =  xs 
-
---fonction qui va retirer l'element de la tete de la liste
-retirerTeteListe :: [String] -> String
-retirerTeteListe [] = []
-retirerTeteListe(x:xs) = x 
