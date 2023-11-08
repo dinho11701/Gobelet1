@@ -1,3 +1,20 @@
+{- |
+Module      :  Main
+Description :  Rassemble les fonctionnalités pour lancer le jeu de Gobelets
+                Le programme prend les entrées des utilisateurs et effectue un mouvement
+                quand celui-ci est valide, sinon on redemande a l'utilisateur de resaisir 
+                son mouvement
+Copyright   :  Oswald Essongué
+License     :  <license>
+
+Maintainer  :  cd891906@ens.uqam.ca
+Stability   :  stable 
+Portability :  portable 
+
+-}
+
+
+import System.IO (withFile, IOMode(AppendMode), hPutStrLn)
 import Joueur
 import System.IO
 import Liste 
@@ -17,12 +34,12 @@ jeu = [ ["__", "__", "__", "__"]
                   , ["__", "__", "__", "__"] ]
 
 
--- Fonction pour lire une action depuis l'utilisateur
+-- | Fonction pour lire une action de l'utilisateur
 lectureActionPlayer :: IO String
 lectureActionPlayer = do
-  putStr "> "  -- Affiche un prompt pour l'utilisateur
-  hFlush stdout  -- Vide le tampon de sortie pour s'assurer que le prompt s'affiche immédiatement
-  getLine  -- Lit une ligne d'entrée depuis la console
+  putStr "> "  
+  hFlush stdout  
+  getLine  
 
 
 -- | Fonction pour afficher un message de bienvenue interactif
@@ -31,11 +48,12 @@ messageBienvenue = do
   putStrLn "Bienvenue dans le jeu Gobblet !"
   putStrLn "Dans ce jeu, vous pouvez entrer des actions pour interagir."
   putStrLn "Par exemple, vous pouvez entrer 'drop(M, (0,1))' pour jouer une piece à la position (0,1)."
+  putStrLn " Plus tard vous pourre aussi deplacer cette piece comme ceci par exemple 'onboard((0, 1), (2, 1))'"
   putStrLn "Entrez 'quitter' pour quitter le jeu."
 
 
 
-
+-- | Cette fonction déplace une piece d'une case de depart y1 x1 a y2 x2
 onboard :: [[String]] -> Int -> Int -> Int -> Int -> [[String]]
 onboard jeuDepart y1 x1 y2 x2
   | x1 < 0 || x1 >= length jeuDepart || y1 < 0 || y1 >= length (jeuDepart !! 0) || x2 < 0 || x2 >= length jeuDepart || y2 < 0 || y2 >= length (jeuDepart !! 0) = jeuDepart
@@ -46,7 +64,8 @@ onboard jeuDepart y1 x1 y2 x2
     in jeuFinal
     
 
-
+-- | Cette fonction détermine si un joueur est gagnant a partir de sa liste de position des piceces
+-- | qu'il a joué
 estLeJoueurGagnant :: [Int] -> Int -> Bool 
 estLeJoueurGagnant [] _ = False
 estLeJoueurGagnant listeComplete i = do
@@ -63,7 +82,7 @@ estLeJoueurGagnant listeComplete i = do
     else False
         
 
-
+-- | Cette fonction cherche a trouver un alignement de 3
 chercheLeTriplet :: [Int] -> [Int] -> [Int]
 chercheLeTriplet listexy listeComplete = do
     let x1 = listexy !! 0
@@ -83,18 +102,14 @@ chercheLeTriplet listexy listeComplete = do
         else []
     
 
+-- | Cette fonction determine si une la taille d'une piece que le joueur veut jouer
+-- | est inférieure a celle qui est dans le jeu 
 estUnePieceTailleInf :: String -> String -> Bool
 estUnePieceTailleInf taillePieceAdd taillePieceDsJeu = taillePieceAdd < taillePieceDsJeu
 
 
-renvoieListeJrAdverse :: Int -> [Int] -> [Int] -> [Int]
-renvoieListeJrAdverse i listeCoordJr0 listeCoordJr1 = do 
-    if i == 0
-        then listeCoordJr1
-    else listeCoordJr0
-
-
-
+-- | Cette fonction permet de gober une piece et d'ajouter la nouvelle piece 
+-- | dans un DictionnairePiece
 goberUnePiece :: String -> String -> [[String]] -> [[DictionnairePiece]] -> [Int] -> [Int] -> Int -> Int -> Int -> Int -> Int -> InfosJeu
 goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoordJr2 x1 y1 x2 y2 i = do 
     
@@ -112,7 +127,7 @@ goberUnePiece taillePieceWantPlay piece jeu liste2DDict listeCoordJr1 listeCoord
         Nothing -> InfosJeu "piece abscente" jeu listeCoordJr1 listeCoordJr2 liste2DDict x2 y2 i
 
 
-
+-- | Cette fonction détermine si un jeu est vide 
 estUnJeuVide :: [[String]] -> Bool
 estUnJeuVide jeu = all (\row -> all (== "__") row) jeu
 
@@ -124,14 +139,14 @@ promptString message = do
     hFlush stdout
     getLine
 
--- Fonction pour saisir les informations de l'utilisateur et les stocker dans un tableau
+-- | Fonction pour saisir les informations de l'utilisateur et les stocker dans un tableau
 getUserInfo :: IO [String]
 getUserInfo = do
     coup <- promptString "Entrez votre coup : "
 
     return [coup]
 
-
+-- | Cette fonction permet de resaisir un coup 
 resaisirCoup :: IO [String]
 resaisirCoup = do
     putStrLn "Saisissez un nouveau coup :"
@@ -139,7 +154,7 @@ resaisirCoup = do
 
 
 
-
+-- | Cette fonction va vérifier si le joueur adversaire va jouer sur une case du joueur actuel 
 vaJouerSurUneCaseAdverse :: [Int] -> [Int] -> Bool
 vaJouerSurUneCaseAdverse _ [] = False
 vaJouerSurUneCaseAdverse listeXYJoueurActuel (x:y:xs) 
@@ -195,7 +210,8 @@ faireSonMeilleurCoupPourUnPoint joueur jeu1 j i deckOrd1 (InfosMeilleurCoup x y 
 
 
 
-            
+-- | Cette fonction va vérifier s'il existe un alignement de 3 
+-- | dans la liste des positions des pieces du joueur 
 existence1Align3 :: [Int] -> [Int] -> String
 existence1Align3 [] _ = "non"
 existence1Align3 listePosPieceJr listeNbALign3 = do
@@ -207,18 +223,20 @@ existence1Align3 listePosPieceJr listeNbALign3 = do
         else "non"
 
 
-
+-- Cette fonction détermine qui joue actuellement
 determinerJoueurActuel :: Player -> String
 determinerJoueurActuel Humain = "Humain"
 determinerJoueurActuel Ordi1 = "Ordi1"
 
 
+-- | Cette fonction détermine qui est le joueur adverse 
 voiciLeJoueurAdverse :: Player -> Player
 voiciLeJoueurAdverse Humain = Ordi1
 voiciLeJoueurAdverse Ordi1 = Humain
 
 
-
+-- | Cette fonction va retourner la liste des positions des pieces
+-- | du joueur adverse
 retourneListePieceAdversaire :: Player -> [Int] -> [Int] -> [Int]
 retourneListePieceAdversaire joueurAdverse listePosPiecHumain listePosPiecOrd1
     | joueurAdverse == Humain = listePosPiecHumain
@@ -226,7 +244,8 @@ retourneListePieceAdversaire joueurAdverse listePosPiecHumain listePosPiecOrd1
     | otherwise = []
 
 
-
+-- | Cette fonction va déterminer si un joueur peut va faire son coup sur une case adverse
+-- | dans le cas ou l'adversaire a un alignement de 3 pieces 
 peutFaireSonCoup :: String -> [Int] -> [Int] -> [Int] -> String
 peutFaireSonCoup joueurActuel xyDuDrop listePosPiecHumain listePosPiecOrd1 = do
     if joueurActuel == "Humain"
@@ -240,6 +259,7 @@ peutFaireSonCoup joueurActuel xyDuDrop listePosPiecHumain listePosPiecOrd1 = do
         else "noon"
 
 
+-- | Cette fonction retorune la piece a une certaine position 
 retourePieceAUnePosition :: [[String]] -> Int -> Int -> String
 retourePieceAUnePosition jeu x y = jeu !! x !! y
 
@@ -449,6 +469,33 @@ lancerPartiePourUnMove joueur moves (ListeModifie jeu (ListesDispo (Deck Humain 
 --}
 
 
+
+-- Fonction pour convertir un tableau 2D en String
+tableau2DToString :: Show a => [[a]] -> String
+tableau2DToString tableau = unlines $ map (unwords . map show) tableau
+
+
+
+-- Fonction pour sauvegarder un tableau 2D dans un fichier
+sauvegarderTableau2D :: Show a => [[a]] -> FilePath -> IO ()
+sauvegarderTableau2D tableau nomFichier = do
+    let donnees = tableau2DToString tableau
+    appendFile nomFichier (donnees ++ "\n")
+
+-- Fonction pour ajouter les données à un fichier existant en append
+sauvegarder :: String -> FilePath -> IO ()
+sauvegarder donnees nomFichier = appendFile nomFichier (donnees ++ "\n")
+
+
+-- Fonction pour sauvegarder un tableau 2D et un message dans un fichier
+sauvegarderTableauEtMessage :: Show a => [[a]] -> String -> FilePath -> IO ()
+sauvegarderTableauEtMessage tableau message nomFichier = withFile nomFichier AppendMode $ \handle -> do
+    hPutStrLn handle message
+    hPutStrLn handle $ tableau2DToString tableau
+
+
+-- | Cette fonction va lancer une partie ou chaque joueur va jouer en faisant un coup 
+-- | Quand la partie est finit, cela montre l'état du jeu au dernier tour joué dans un fichier
 lancerPartie :: Player -> Int -> ListeModifie -> [[DictionnairePiece]] -> IO ()
 lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (Deck Ordi1 deckOrd1)) pieceAJouer1) liste2D = do
     
@@ -457,7 +504,7 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
     let messageFin = quiAGagne joueur
     
     let (ListeCoord listPosPiecHumain listPosPiecOrd) = creerListeCoordPieces jeu [] [] 0 0
-    --string humain ou joueur
+
     let joueurActuel = determinerJoueurActuel joueur 
     
     let adversaire = voiciLeJoueurAdverse joueur
@@ -467,6 +514,10 @@ lancerPartie joueur tour (ListeModifie jeu (ListesDispo (Deck Humain decHum) (De
     if estLeJoueurGagnant listePosPieceAdversaire 0
         then do 
             print messageFin
+            let message = messageFin ++ " au Tour " ++ show tour
+            sauvegarderTableauEtMessage jeu message "tableau2D.txt"
+            sauvegarderTableau2D jeu "tableau2D.txt"
+            
     else do 
         let joueurSuivant = alternerJoueurs joueur 
         let playerNow = quiJoueNow joueur
