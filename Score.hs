@@ -14,27 +14,45 @@ Portability :  portable
 module Score (score) where
 
 import State (State)
-import Data.List (transpose, group)
+import Data.List (transpose, inits, tails)
+
+-- | Vérifie si une séquence peut potentiellement former une ligne de 4.
+-- Une séquence est un alignement potentiel si elle contient au moins une pièce d'un joueur et peut être étendue à une longueur de 4.
+alignementPotentiel :: Char -> String -> Bool
+alignementPotentiel joueur seq =
+  joueur `elem` seq && length seq == 4 && not (all (/= joueur) seq)
+
+-- | Aplatit une liste de listes en une liste de chaînes, où chaque chaîne représente une ligne potentielle.
+aplatirInitsTails :: [[a]] -> [[a]]
+aplatirInitsTails = concatMap (\xs -> concatMap tails (inits xs))
 
 -- | Calcule le score d'un état donné pour le jeu.
 score :: State -> Int
-score state = playerScore 'X' - playerScore 'O'
+score etat = scoreJoueur 'X' - scoreJoueur 'O'
   where
-    -- | Calcule le score d'un joueur dans un état donné en faisant la somme des scores pour chaque ligne et diagonale.
-    playerScore player = sum $ map (calculateScoreForLine player) (linesAndDiagonals state)
+    scoreJoueur joueur = sum $ map (scoreLigne joueur) (lignesEtDiagonales etat)
 
-    -- | Calcule le score d'un joueur pour une ligne donnée en comptant le nombre de séquences de 2 et 3 symboles consécutifs du joueur.
-    calculateScoreForLine player line =
-      let twoInARow = filter (\grp -> length grp == 2 && head grp == player) $ group line
-          threeInARow = filter (\grp -> length grp == 3 && head grp == player) $ group line
-      in length twoInARow + 10 * length threeInARow
+    -- | Calcule le score d'une ligne en considérant les alignements potentiels.
+    scoreLigne joueur ligne =
+      let sequences = aplatirInitsTails ligne
+          alignementsPotentiels = filter (alignementPotentiel joueur) sequences
+      in sum $ map (scoreSequence joueur) alignementsPotentiels
+
+    -- | Calcule le score d'une séquence en considérant les alignements partiels.
+    scoreSequence joueur seq =
+      let compteJoueur = length $ filter (== joueur) seq
+      in case compteJoueur of
+          1 -> 1
+          2 -> 5
+          3 -> 10
+          _ -> 0
 
     -- | Génère une liste de lignes et de diagonales à partir de l'état du jeu.
-    linesAndDiagonals board = board ++ transpose board ++ diagonals board
+    lignesEtDiagonales plateau = plateau ++ transpose plateau ++ diagonales plateau
 
     -- | Génère les diagonales principales (de gauche à droite) à partir de l'état du jeu.
-    diagonals board = [primaryDiagonal board, primaryDiagonal (map reverse board)]
+    diagonales plateau = [diagonalePrincipale plateau, diagonalePrincipale (map reverse plateau)]
 
     -- | Génère la diagonale principale d'une matrice.
-    primaryDiagonal [] = []
-    primaryDiagonal (row:rows) = head row : primaryDiagonal (map tail rows)
+    diagonalePrincipale [] = []
+    diagonalePrincipale (rangee:rangees) = head rangee : diagonalePrincipale (map tail rangees)
