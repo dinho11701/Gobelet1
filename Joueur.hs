@@ -19,7 +19,9 @@ import Liste
 data ListeModifie = ListeModifie [[String]] ListesDispo String
 
 -- Type de donnée Player qui peut etre un Humain Ou Un Ordi1
-data Player = Humain | Ordi1 
+data Player 
+    = Humain -- ^ Represente l'utilisateur.
+    | Ordi1 -- ^ Represente l'IA.
     deriving (Eq, Show)
 
 -- Type de donnée Deck qui est composé d'un Player et sa liste de pieces
@@ -106,4 +108,3 @@ retournePieceCorrespondante Ordi1 "T" = "O0"
 afficher2Decks :: [String] -> [String] -> String
 afficher2Decks list1 list2 =
   unwords list1 ++ " || " ++ unwords list2
-
