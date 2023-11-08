@@ -1,4 +1,34 @@
 
+{- |
+Module      :  Move
+Description :  Définit les types de taille, de position et de mouvement pour un jeu.
+                Ce module inclut également des analyseurs pour interpréter la taille 
+                et le mouvement ainsi que des fonctions utilitaires pour la validité
+                des mouvements et la récupération d'informations.
+Copyright   :  Oswald Essongué
+License     :  <license>
+
+Maintainer  :  cd891906@ens.uqam.ca
+Stability   :  stable 
+Portability :  portable 
+
+
+Le module `Move` fournit les types de données fondamentaux et les fonctionnalités 
+pour représenter et manipuler les mouvements dans un jeu. Il définit `Size` pour 
+représenter différentes tailles de pièces de jeu, `Position` pour représenter les 
+coordonnées sur le plateau de jeu, et `Move` pour représenter les actions de placement
+ou de déplacement d'une pièce sur le plateau.
+
+Des analyseurs syntaxiques sont inclus qui peuvent interpréter des chaînes de 
+caractères comme des types de données `Size` et `Move`, permettant ainsi une 
+interface basée sur le texte ou une communication réseau pour piloter la mécanique du jeu.
+
+Des fonctions utilitaires sont fournies pour vérifier la validité d'un mouvement,
+déterminer si un mouvement est un placement ou un déplacement d'une pièce, et pour 
+extraire les informations pertinentes des mouvements.
+
+-}
+
 
 
 module Move where
@@ -23,7 +53,7 @@ data Move = Drop Size Position -- ^ Mouvement drop pour placer la piece de a une
     | Onboard Position Position -- ^ Mouvement onboard pour déplacer la piece d'une position a une autre
     deriving Show
 
--- Analyseur pour les tailles
+-- | Analyseur pour les tailles
 sizeParser :: Parser Size
 sizeParser = choice
     [ T <$ char 'T'
@@ -32,7 +62,7 @@ sizeParser = choice
     , B <$ char 'B'
     ]
 
--- Analyseur pour les positions
+-- | Analyseur pour les positions
 positionParser :: Parser Position
 positionParser = do
     char '('
@@ -43,7 +73,7 @@ positionParser = do
     char ')'
     return $ Position (read [x]) (read [y])
 
--- Analyseur pour les mouvements "onboard"
+-- | Analyseur pour les mouvements "onboard"
 onboardParser :: Parser Move
 onboardParser = do
     string "onboard"
@@ -55,7 +85,7 @@ onboardParser = do
     char ')'
     return (Onboard position1 position2)
 
--- Analyseur pour les mouvements "drop"
+-- | Analyseur pour les mouvements "drop"
 dropParser :: Parser Move
 dropParser = do
     string "drop"
@@ -67,7 +97,7 @@ dropParser = do
     char ')'
     return (Drop size position)
 
--- Analyseur pour les mouvements
+-- | Analyseur pour les mouvements
 parseMoves :: [String] -> [Move]
 parseMoves input = 
     case parse (many (try onboardParser <|> dropParser)) "" (unlines input) of
@@ -106,5 +136,4 @@ verifierCoup liste
 -- | Détermine si le coup joué est un drop
 estCasDrop :: [Int] -> Bool
 estCasDrop liste = all(\x -> x == -1) liste 
-
 
